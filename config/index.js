@@ -1,0 +1,1 @@
+exports.TOKEN_KEY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

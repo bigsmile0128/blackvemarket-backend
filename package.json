@@ -1,24 +1,46 @@
 {
-  "name": "nodejs-express-mysql",
+  "name": "backend-service",
   "version": "1.0.0",
-  "description": "Node.js Restful CRUD API with Node.js, Express and MySQL",
-  "main": "server.js",
+  "description": "Backend Service",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha",
+    "start-verbose": "set DEBUG=app & nodemon --verbose app.js",
+    "start-all-debug": "set DEBUG=* & nodemon app.js",
+    "start": "nodemon app.js"
   },
   "keywords": [
-    "nodejs",
-    "express",
-    "mysql",
-    "restapi"
+    "Node.js",
+    "Express"
   ],
-  "author": "bezkoder",
-  "license": "ISC",
+  "author": "Brajalal Pal <brajalal@rediffmail.com>",
+  "license": "MIT",
   "dependencies": {
+    "adm-zip": "^0.5.9",
+    "axios": "^0.20.0",
     "bcrypt": "^5.0.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "bootstrap": "^4.3.1",
+    "connect-flash": "^0.1.1",
+    "connect-mongodb-session": "^2.2.0",
     "cors": "^2.8.5",
-    "express": "^4.17.1",
+    "crypto": "^1.0.1",
+    "csurf": "^1.10.0",
+    "dotenv": "^16.0.0",
+    "download": "^8.0.0",
+    "ejs": "^3.1.5",
+    "express": "^4.16.4",
+    "express-session": "^1.17.0",
+    "express-validator": "^6.3.1",
+    "express-zip": "^3.0.0",
+    "jquery": "^3.5.1",
     "jsonwebtoken": "^8.5.1",
-    "mysql": "^2.17.1"
+    "mongodb": "^3.4.1",
+    "mongoose": "^5.8.1",
+    "morgan": "^1.9.1",
+    "multer": "^1.4.4",
+    "nodemailer": "^6.7.5",
+    "nodemon": "^2.0.15"
   }
 }

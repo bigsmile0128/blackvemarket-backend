@@ -1,0 +1,40 @@
+{
+  "files": {
+    "main.css": "/static/css/main.43f5bcbd.css",
+    "main.js": "/static/js/main.a8d8a6b4.js",
+    "static/js/787.5a972f24.chunk.js": "/static/js/787.5a972f24.chunk.js",
+    "static/media/sideNavigationShadow.svg": "/static/media/sideNavigationShadow.2eb2e99d0a89a108fdc2c872927270ec.svg",
+    "static/media/BackgroundWrinkles1.svg": "/static/media/BackgroundWrinkles1.f1e8418be53153fa985242e337534ba3.svg",
+    "static/media/BackgroundWrinkles2.svg": "/static/media/BackgroundWrinkles2.f1e8418be53153fa9852.svg",
+    "static/media/backgroundWrinklesLight.svg": "/static/media/backgroundWrinklesLight.6039482e18875c74cbffad88e81c6b72.svg",
+    "static/media/kycApprovedImg.svg": "/static/media/kycApprovedImg.3c35dbe570aef42c550d48dac3daad8a.svg",
+    "static/media/metaMaskIcon.svg": "/static/media/metaMaskIcon.0fa03e0d1bbf7783b66db33b442f696c.svg",
+    "static/media/kycPendingImg.svg": "/static/media/kycPendingImg.60a2ad015b15ce267a30c21fe2fe0401.svg",
+    "static/media/userProfileAvatar.png": "/static/media/userProfileAvatar.93b65f65337e7da5d291.png",
+    "static/media/contact-us-writing.svg": "/static/media/contact-us-writing.ee6b680beca47b3abc2f8d0f67d22ce8.svg",
+    "static/media/trustWalletIcon.svg": "/static/media/trustWalletIcon.0fbe46cd116033713626a5f2381cb5d3.svg",
+    "static/media/sideFooterLogoLight.svg": "/static/media/sideFooterLogoLight.28006aed3fa569166a6d9aaae00b08a4.svg",
+    "static/media/slick.svg": "/static/media/slick.2630a3e3eab21c607e21.svg",
+    "static/media/sideFooterLogoDark.svg": "/static/media/sideFooterLogoDark.b700e56928b55299e442edc3afe97a84.svg",
+    "static/media/slick.eot": "/static/media/slick.a4e97f5a2a64f0ab1323.eot",
+    "static/media/slick.ttf": "/static/media/slick.c94f7671dcc99dce43e2.ttf",
+    "static/media/mathwallet-vector-logo-dark.svg": "/static/media/mathwallet-vector-logo-dark.adf886e87979e5ffdb8a84fb0786ba42.svg",
+    "static/media/slick.woff": "/static/media/slick.295183786cd8a1389865.woff",
+    "static/media/mathwallet-vector-logo-light.svg": "/static/media/mathwallet-vector-logo-light.85c341021a479f71da6d49c5d914a6d5.svg",
+    "static/media/mainLogoLight.svg": "/static/media/mainLogoLight.1b2e6fa5e69051974712d593a5f517e4.svg",
+    "static/media/mainLogo.svg": "/static/media/mainLogo.c89c82e3c81bca8e8de6ccf7b9cacb4b.svg",
+    "index.html": "/index.html",
+    "static/media/backdropMobile.svg": "/static/media/backdropMobile.88fbb1b2f99376622a13de5f4bc1b32f.svg",
+    "static/media/InterventionBackDropCircle.svg": "/static/media/InterventionBackDropCircle.6f6a12cbbb1cfd2b9a23deb7d9501ff8.svg",
+    "static/media/binanceWalletIcon.svg": "/static/media/binanceWalletIcon.2d32b260a96f8dc1965221bfcea8e558.svg",
+    "static/media/getFetch.cjs": "/static/media/getFetch.c780682470504fffbd04.cjs",
+    "static/media/minuteDotIcon.svg": "/static/media/minuteDotIcon.e50829c023b703173c0ea5220f01734b.svg",
+    "main.43f5bcbd.css.map": "/static/css/main.43f5bcbd.css.map",
+    "main.a8d8a6b4.js.map": "/static/js/main.a8d8a6b4.js.map",
+    "787.5a972f24.chunk.js.map": "/static/js/787.5a972f24.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.43f5bcbd.css",
+    "static/js/main.a8d8a6b4.js"
+  ]
+}
