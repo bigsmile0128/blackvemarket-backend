@@ -23,7 +23,7 @@ var storage = multer.diskStorage({
   ]);
 const router = express.Router();
 
-router.get("/edit-profile",multiUpload, UserCtrl.editProfile);
+router.post("/edit-profile",multiUpload, UserCtrl.editProfile);
 router.post("/user-register",UserCtrl.Register);
 
 module.exports = router;
