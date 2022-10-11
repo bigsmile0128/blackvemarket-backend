@@ -1,0 +1,371 @@
+{
+	"info": {
+		"_postman_id": "a14835c1-5c8c-488a-b3fd-cfbf23490286",
+		"name": "BlackVeMarket",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Edit Profile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "name",
+									"value": "Jonathan",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "customeURL",
+									"value": "https://advanceddev.carrd.co",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "email",
+									"value": "orion0828@gmail.com",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "bio",
+									"value": "He is ...",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "facebook",
+									"value": "@orion0828",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "twitter",
+									"value": "@twitter/orion0828",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "discord",
+									"value": "orion0828#8545",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "avatar",
+									"value": "me.png",
+									"description": "string",
+									"type": "default"
+								},
+								{
+									"key": "coverImg",
+									"value": "cover.png",
+									"description": "string",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "/users/edit-profile",
+							"path": [
+								"users",
+								"edit-profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "User Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "walletaddr",
+									"value": "0xFBCE93D28Dc0B6D06C772E7E48721161A5B895b8",
+									"description": "String",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "/users/user-register",
+							"path": [
+								"users",
+								"user-register"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Product",
+			"item": [
+				{
+					"name": "Create Item(Fixed Price)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "price",
+									"value": "2",
+									"description": "Number",
+									"type": "default"
+								},
+								{
+									"key": "title",
+									"value": "Wolf Warrior",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "description",
+									"value": "He is ...",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "royalties",
+									"value": "5",
+									"description": "Number",
+									"type": "default"
+								},
+								{
+									"key": "size",
+									"value": "Medium",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "abstract",
+									"value": "Virtual World",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "assets",
+									"value": "wolf.png",
+									"description": "String",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/products/create-item/fixed-price",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"products",
+								"create-item",
+								"fixed-price"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Collection",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "logoImage",
+									"value": "logo.png",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "bannerImage",
+									"value": "banner.png",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "name",
+									"value": "Wolf Group",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "url",
+									"value": "https://skso",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "description",
+									"value": "He is",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "category",
+									"value": "Virtual World",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "payment",
+									"value": "VET",
+									"description": "String",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/products/create-collection",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"products",
+								"create-collection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Item(Auction Price)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "title",
+									"value": "Wolf Warrior",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "description",
+									"value": "He is ...",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "bid_starting_date",
+									"value": "02/28/2022",
+									"description": "Date",
+									"type": "default"
+								},
+								{
+									"key": "bid_expiration_date",
+									"value": "03/014/2022",
+									"description": "Date",
+									"type": "default"
+								},
+								{
+									"key": "minimum_bid",
+									"value": "I am ...",
+									"description": "String",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/products/create-item/auction-price",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"products",
+								"create-item",
+								"auction-price"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "OpenBids",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "urlencoded",
+							"urlencoded": [
+								{
+									"key": "price",
+									"value": "2",
+									"description": "Number"
+								},
+								{
+									"key": "title",
+									"value": "Wolf Warrior",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "description",
+									"value": "He is ...",
+									"description": "String",
+									"type": "default"
+								},
+								{
+									"key": "bid_starting_date",
+									"value": "02/28/2022",
+									"description": "Date",
+									"type": "default"
+								},
+								{
+									"key": "bid_expiration_date",
+									"value": "03/014/2022",
+									"description": "Date",
+									"type": "default"
+								},
+								{
+									"key": "minimum_bid",
+									"value": "He is ...",
+									"description": "String",
+									"type": "default"
+								}
+							]
+						},
+						"url": {
+							"raw": "localhost:8080/api/products/create-item/openbids",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"products",
+								"create-item",
+								"openbids"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
