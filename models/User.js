@@ -13,7 +13,7 @@ const UserSchema = new Schema(
             type: String,
             required: true,
         },
-        user_customeURL: {
+        user_customURL: {
             type: String,
         },
         user_bio: {
