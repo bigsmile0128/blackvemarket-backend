@@ -18,7 +18,7 @@ var storage = multer.diskStorage({
     limits: { fileSize: 1024 * 1024 * 50 },
   });
   const multiUpload = upload.fields([
-    { name: "LogoImage", maxCount: 1 },
+    { name: "logoImage", maxCount: 1 },
     { name: "bannerImage", maxCount: 1 },
   ]);
   const multiUpload1 = upload.fields([

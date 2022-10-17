@@ -27,14 +27,7 @@ const UserSchema = new Schema(
             type: String,
             required: true
         },
-        collection_category: {
-            type: String,
-            required: true
-        },
-        collection_payment: {
-            type: String,
-            required: true
-        }
+        
     },
     {
         timestamps: true,

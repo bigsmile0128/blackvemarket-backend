@@ -2,10 +2,10 @@ const User = require("../models/User");
 const CreateCollection = require("../models/CreateCollection");
 const FixedPriceMarket = require("../models/FixedPriceMarket");
 exports.createCollection = (req, res) => {
-  const { name, url, description, category, payment, user_id } = req.body;
+  const { name, url, description, user_id } = req.body;
   const logoImage = req.files["logoImage"][0].filename;
   const bannerImage = req.files["bannerImage"][0].filename;
-  User.findOne({ user_id: user_id }).then((user) => {
+  User.findOne({ _id: user_id }).then((user) => {
     if (!user) {
       return res.status(400).json({ resp: "This user not found" });
     }
@@ -16,8 +16,6 @@ exports.createCollection = (req, res) => {
     newCollection.collection_bannerImage = bannerImage;
     newCollection.collection_url = url;
     newCollection.collection_description = description;
-    newCollection.collection_category = category;
-    newCollection.collection_payment = payment;
     newCollection
       .save()
       .then(res.status(200).json({ resp: "success" }))
