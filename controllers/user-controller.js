@@ -28,11 +28,11 @@ exports.editProfile = async (req, res) => {
     discord,
     walletaddr,
   } = req.body;
+  console.log(req.body);
   
   console.log(req.files["avatar"][0].filename);
   const avatar = req.files["avatar"][0].filename;
   const coverImg = req.files["coverImg"][0].filename;
-  console.log(req.body);
   //check
   try {
     const user = await User.findOne({ user_wallet_address: walletaddr });
