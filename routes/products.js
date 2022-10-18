@@ -28,5 +28,6 @@ const router = express.Router();
 
 router.post("/create-collection",multiUpload, ProductCtrl.createCollection);
 router.post("/create-item/fixed-price",multiUpload1,ProductCtrl.FixedPriceMarket);
+router.get("/get-collections", ProductCtrl.getCollections);
 
 module.exports = router;

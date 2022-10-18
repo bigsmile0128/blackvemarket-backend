@@ -23,6 +23,14 @@ exports.createCollection = (req, res) => {
   });
 };
 
+exports.getCollections = (req, res) => {
+  CreateCollection.find()
+    .then((clts) => {
+      res.status(200).json({ resp: "success", collections: clts });
+    })
+    .catch((err) => console.log(err));
+};
+
 exports.FixedPriceMarket = (req, res) => {
   const { price, title, description, royalties, size, abstract, user_id } =
     req.body;
