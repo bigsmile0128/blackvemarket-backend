@@ -25,8 +25,8 @@ exports.createCollection = (req, res) => {
 
 exports.getCollections = (req, res) => {
   CreateCollection.find()
-    .then((clts) => {
-      res.status(200).json({ resp: "success", collections: clts });
+    .then((collections) => {
+      res.status(200).json({ collections });
     })
     .catch((err) => console.log(err));
 };
