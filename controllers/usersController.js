@@ -1,15 +1,15 @@
-const User = require("../models/User");
+const User = require("../models/users");
 
-exports.Register = (req, res) => {
-  const params = req.body;
-  User.findOne({ user_wallet_address: params.walletaddr }).then((user) => {
+exports.register = (req, res) => {
+  const { walletaddr } = req.body;
+  User.findOne({ address: walletaddr }).then((user) => {
     if (user) {
       return res
         .status(200)
         .json({ resp: "This user already exists", user: user });
     }
     let newUser = new User();
-    newUser.user_wallet_address = params.walletaddr;
+    newUser.address = walletaddr;
     newUser
       .save()
       .then(res.status(200).json({ resp: "success", user: newUser }))
@@ -29,22 +29,22 @@ exports.editProfile = async (req, res) => {
     walletaddr,
   } = req.body;
   console.log(req.body);
-  
+
   console.log(req.files["avatar"][0].filename);
   const avatar = req.files["avatar"][0].filename;
   const coverImg = req.files["coverImg"][0].filename;
   //check
   try {
-    const user = await User.findOne({ user_wallet_address: walletaddr });
-    user.user_name = name;
-    user.user_customURL = customURL;
-    user.user_email = email;
-    user.user_bio = bio;
-    user.user_facebook = facebook;
-    user.user_twitter = twitter;
-    user.user_discord = discord;
-    user.user_avatar = avatar;
-    user.user_coverImg = coverImg;
+    const user = await User.findOne({ address: walletaddr });
+    user.name = name;
+    user.url = customURL;
+    user.email = email;
+    user.bio = bio;
+    user.facebook = facebook;
+    user.twitter = twitter;
+    user.discord = discord;
+    user.avatar = avatar;
+    user.coverImg = coverImg;
     await user.save();
     res.json({ resp: "Update Success" });
   } catch (err) {

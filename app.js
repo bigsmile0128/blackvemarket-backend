@@ -3,8 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const morgan = require("morgan");
-const userRoutes = require("./routes/users");
-const productRoutes = require("./routes/products");
+const apiRouter = require("./routes/api-router");
 const path = require("path");
 require("dotenv").config();
 const app = express();
@@ -23,8 +22,14 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-app.use(bodyParser.json({limit:"50mb"}));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit:50000 }));
+app.use(bodyParser.json({ limit: "50mb" }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public", "build")));
 app.get("/", function (req, res) {
@@ -33,8 +38,7 @@ app.get("/", function (req, res) {
 app.use(cors());
 
 //define Routes
-app.use("/api/users", userRoutes);
-app.use("/api/products", productRoutes);
+app.use("/api/v1", apiRouter);
 
 http.listen(3333, () => {
   console.log(`client started port 3333`);

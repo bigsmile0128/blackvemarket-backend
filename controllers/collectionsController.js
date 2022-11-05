@@ -1,21 +1,23 @@
-const User = require("../models/User");
-const CreateCollection = require("../models/CreateCollection");
+const User = require("../models/users");
+const Collections = require("../models/collections");
 const FixedPriceMarket = require("../models/FixedPriceMarket");
+
 exports.createCollection = (req, res) => {
-  const { name, url, description, user_id } = req.body;
-  const logoImage = req.files["logoImage"][0].filename;
-  const bannerImage = req.files["bannerImage"][0].filename;
+  const { name, symbol, description, address, user_id } = req.body;
+  const logoImg = req.files["logoImg"][0].filename;
+  const bannerImg = req.files["bannerImg"][0].filename;
   User.findOne({ _id: user_id }).then((user) => {
     if (!user) {
       return res.status(400).json({ resp: "This user not found" });
     }
-    newCollection = new CreateCollection();
+    newCollection = new Collections();
     newCollection.user_id = user_id;
-    newCollection.collection_name = name;
-    newCollection.collection_logoImage = logoImage;
-    newCollection.collection_bannerImage = bannerImage;
-    newCollection.collection_url = url;
-    newCollection.collection_description = description;
+    newCollection.name = name;
+    newCollection.logoImg = logoImg;
+    newCollection.bannerImg = bannerImg;
+    newCollection.symbol = symbol;
+    newCollection.description = description;
+    newCollection.address = address;
     newCollection
       .save()
       .then(res.status(200).json({ resp: "success" }))
@@ -24,16 +26,15 @@ exports.createCollection = (req, res) => {
 };
 
 exports.getCollections = (req, res) => {
-  CreateCollection.find()
+  Collections.find()
     .then((collections) => {
       res.status(200).json({ collections });
     })
     .catch((err) => console.log(err));
 };
 
-exports.FixedPriceMarket = (req, res) => {
-  const { price, title, description, royalties, size, abstract, user_id } =
-    req.body;
+exports.fixedPriceMarket = (req, res) => {
+  const { price, title, description, royalties, user_id } = req.body;
   const assets = req.files["assets"][0].filename;
   User.findOne({ _id: user_id }).then((user) => {
     if (!user) {
@@ -41,13 +42,11 @@ exports.FixedPriceMarket = (req, res) => {
     }
     newItem = new FixedPriceMarket();
     newItem.user_id = user_id;
-    newItem.item_price = price;
-    newItem.item_title = title;
-    newItem.item_royalties = royalties;
-    newItem.item_size = size;
-    newItem.item_description = description;
-    newItem.item_abstract = abstract;
-    newItem.item_assets = assets;
+    newItem.price = price;
+    newItem.title = title;
+    newItem.royalties = royalties;
+    newItem.description = description;
+    newItem.assets = assets;
     newItem
       .save()
       .then(res.status(200).json({ resp: "success" }))

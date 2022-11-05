@@ -2,43 +2,38 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema(
-    {
-        user_id: {
-            type: Schema.Types.ObjectId,
-            ref: "User",
-        },
-        item_price: {
-            type: String,
-            required: true
-        },
-        item_title: {
-            type: String,
-            required: true
-        },
-        item_description: {
-            type: String,
-            required: true
-        },
-        item_royalties: {
-            type: String,
-            required: true
-        },
-        item_size: {
-            type: String,
-            required: true
-        },
-        item_abstract: {
-            type: String,
-            required: true
-        },
-        item_assets: {
-            type: String,
-            required: true
-        }
+  {
+    user_id: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
     },
-    {
-        timestamps: true,
-    }
+    price: {
+      type: String,
+      required: true,
+    },
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    royalties: {
+      type: String,
+      required: true,
+    },
+    assets: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = FixedPriceMarket = mongoose.model("FixedPriceMarket", UserSchema);
+module.exports = FixedPriceMarket = mongoose.model(
+  "FixedPriceMarket",
+  UserSchema
+);
