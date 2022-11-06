@@ -13,27 +13,27 @@ app.use(morgan("dev"));
 
 //mongodb connect
 mongoose
-  .connect(url, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
-  .then(() => {
-    console.log("mongodb connected");
-  })
-  .catch((err) => console.log(err));
+    .connect(url, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
+    .then(() => {
+        console.log("mongodb connected");
+    })
+    .catch((err) => console.log(err));
 
 app.use(bodyParser.json({ limit: "50mb" }));
 app.use(
-  bodyParser.urlencoded({
-    limit: "50mb",
-    extended: true,
-    parameterLimit: 50000,
-  })
+    bodyParser.urlencoded({
+        limit: "50mb",
+        extended: true,
+        parameterLimit: 50000,
+    })
 );
 app.use(express.static("public"));
 app.use(express.static(path.join(__dirname, "public", "build")));
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "public", "build", "index.html"));
+    res.sendFile(path.join(__dirname, "public", "build", "index.html"));
 });
 app.use(cors());
 
@@ -41,8 +41,8 @@ app.use(cors());
 app.use("/api/v1", apiRouter);
 
 http.listen(3333, () => {
-  console.log(`client started port 3333`);
+    console.log(`client started port 3333`);
 });
 app.listen(process.env.PORT || 9999, "0.0.0.0", () => {
-  console.log(`Server started port 9999`);
+    console.log(`Server started port 9999`);
 });
