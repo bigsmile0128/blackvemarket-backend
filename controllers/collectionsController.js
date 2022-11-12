@@ -59,11 +59,15 @@ exports.getItemDetails = async (req, res) => {
 
   try {
     const nftModel = mongoose.model(col_name, nftSchema);
+    const collection = await Collections.findOne({ col_name });
     const details = await nftModel.findOne({ token_id: token_id });
+
+    console.log(collection);
 
     res.status(200).json({
       status: "success",
       details,
+      collection,
     });
   } catch (err) {
     console.log("model error ", err);
