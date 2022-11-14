@@ -21,10 +21,15 @@ exports.addNFT = async (req, res) => {
   const { col_name, meta_json, token_id } = req.body;
 
   try {
+    let json = JSON.parse(meta_json);
     const nftModel = mongoose.model(col_name, nftSchema);
     await nftModel.create({
       token_id: token_id,
-      meta_uri: meta_json,
+      // meta_uri: meta_json,
+      name: json.name,
+      description: json.description,
+      image: json.image,
+      attributes: json.attributes
     });
   } catch (err) {
     console.log("model error ", err);
@@ -105,7 +110,7 @@ exports.getAllNfts = async (req, res) => {
 };
 
 exports.createCollection = (req, res) => {
-  const { name, symbol, description, address, user_id } = req.body;
+  const { name, symbol, description, address, user_id, total_supply } = req.body;
   User.findOne({ _id: user_id }).then((user) => {
     if (!user) {
       return res.status(400).json({ resp: "This user not found" });
@@ -123,6 +128,7 @@ exports.createCollection = (req, res) => {
     newCollection.description = description;
     newCollection.address = address;
     newCollection.col_name = name.replaceAll(" ", "_").toLowerCase();
+    newCollection.total_supply = total_supply;
     newCollection
       .save()
       .then(res.status(200).json({ resp: "success" }))

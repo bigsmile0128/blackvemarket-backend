@@ -18,6 +18,7 @@ const collectionsSchema = new Schema(
             type: String,
             required: true,
         },
+        total_supply: Number,
         symbol: String,
         description: String,
         col_name: String,
