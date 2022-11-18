@@ -9,6 +9,7 @@ const nftSchema = new Schema({
     token_id: Number,
     attributes: [{ type: Map }],
     meta_uri: String,
+    valid: Boolean,
 });
 
 module.exports = nftSchema;

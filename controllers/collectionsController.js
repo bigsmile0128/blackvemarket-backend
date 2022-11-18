@@ -39,6 +39,20 @@ exports.addNFT = async (req, res) => {
   });
 };
 
+exports.updateNFT = async (req, res) => {
+  const { col_name, token_id } = req.body;
+
+  try {
+    const nftModel = mongoose.model(col_name, nftSchema);
+    await nftModel.updateOne({token_id: token_id}, {$set: {valid: true}});
+  } catch (err) {
+    console.log("model error ", err);
+  }
+  res.status(200).json({
+    status: "success",
+  });
+};
+
 exports.getNFTs = async (req, res) => {
   const { col_name, start, limit } = req.body;
 
@@ -67,7 +81,27 @@ exports.getItemDetails = async (req, res) => {
     const collection = await Collections.findOne({ col_name });
     const details = await nftModel.findOne({ token_id: token_id });
 
-    console.log(collection);
+    res.status(200).json({
+      status: "success",
+      details,
+      collection,
+    });
+  } catch (err) {
+    console.log("model error ", err);
+    res.status(400).json({
+      status: "fail",
+      msg: "getNFT failed",
+    });
+  }
+};
+
+exports.getNFTInfo = async (req, res) => {
+  const { address, token_id } = req.body;
+
+  try {
+    const collection = await Collections.findOne({ address });
+    const nftModel = mongoose.model(collection['col_name'], nftSchema);
+    const details = await nftModel.findOne({ token_id: token_id });
 
     res.status(200).json({
       status: "success",
