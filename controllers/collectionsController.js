@@ -4,6 +4,12 @@ const FixedPriceMarket = require("../models/FixedPriceMarket");
 const { uriToHttp, uriToImage } = require("../utils");
 const nftSchema = require("../models/nft_schema");
 const mongoose = require("mongoose");
+const { Framework } = require('@vechain/connex-framework')
+const { Driver, SimpleNet } = require('@vechain/connex-driver')
+const BlackVeMarket_JSON = require("../abis/BlackVeMarket.json")
+
+const BlackVeMarket_ABI = BlackVeMarket_JSON.abi;
+const BlackVeMarket_Address = BlackVeMarket_JSON.address;
 
 const convertMapToStringKey = (data) => {
   const result = [];
@@ -208,3 +214,69 @@ exports.fixedPriceMarket = (req, res) => {
       .catch((err) => console.log(err));
   });
 };
+
+const getConnex = async () => {
+  const driver = await Driver.connect(new SimpleNet('https://testnet.veblocks.net'))
+  const connex = new Framework(driver)
+  return connex
+}
+
+exports.getLiveAuctions = async (req, res) => {
+  try {
+    const connex = await getConnex();
+
+    const abiSalesCount = BlackVeMarket_ABI.find(({name}) => name === "salesCount");
+          
+    const resultCount = await connex.thor
+        .account(BlackVeMarket_Address)
+        .method(abiSalesCount)
+        .call();
+    
+    const salesCount = resultCount.decoded[0];
+    const liveAuctions = [];
+
+    for ( var i = 0; i < salesCount; i ++ ) {
+        const abiSaleList = BlackVeMarket_ABI.find(({name}) => name === "saleList");
+        
+        const result = await connex.thor
+            .account(BlackVeMarket_Address)
+            .method(abiSaleList)
+            .call(i + 1);
+        const auctionSale = result.decoded;
+        if ( auctionSale && ((auctionSale.minPrice > 0 && auctionSale.duration > 0 && auctionSale.startedAt * 1000 + auctionSale.duration * 1000 >= Date.now()) || auctionSale.fixedPrice > 0) && auctionSale.finalPrice == 0 ) {
+            const abiHighestOffers = BlackVeMarket_ABI.find(({name}) => name === "highestOffers");
+
+            const result = await connex.thor
+                .account(BlackVeMarket_Address)
+                .method(abiHighestOffers)
+                .call(i + 1);
+
+            const offer = result.decoded;
+
+            const collection = await Collections.findOne({ address: auctionSale.contractAddr });
+            const nftModel = mongoose.model(collection['col_name'], nftSchema);
+            const details = await nftModel.findOne({ token_id: auctionSale.tokenId });
+
+            liveAuctions.push({
+                auctionSale,
+                saleId: i + 1,
+                offer,
+                collection,
+                details
+            });
+        }
+    }
+
+    res.status(200).json({
+      status: "success",
+      liveAuctions,
+    });
+
+  } catch (err) {
+    console.log("error", err);
+    res.status(400).json({
+      status: "fail",
+      msg: "getLiveAuctions failed",
+    });
+  }
+}

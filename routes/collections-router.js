@@ -43,5 +43,6 @@ router.post("/get-itdetails", collectionsController.getItemDetails);
 router.post("/nft", collectionsController.getNFTInfo);
 router.post("/get-allnfts", collectionsController.getAllNfts);
 router.post("/update-nft", collectionsController.updateNFT);
+router.get("/liveAuctions", collectionsController.getLiveAuctions);
 
 module.exports = router;

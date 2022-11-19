@@ -16,6 +16,8 @@
   "author": "Brajalal Pal <brajalal@rediffmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@vechain/connex-driver": "2.0.8",
+    "@vechain/connex-framework": "2.0.8",
     "adm-zip": "^0.5.9",
     "axios": "^0.20.0",
     "bcrypt": "^5.0.1",
