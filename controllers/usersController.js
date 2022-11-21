@@ -32,12 +32,8 @@ exports.getProfile = async (req, res) => {
 };
 
 exports.editProfile = async (req, res) => {
-  const { name, url, email, bio, facebook, twitter, discord, walletaddr } =
-    req.body;
-  console.log(req.body);
+    const { name, url, email, bio, walletaddr } = req.body;
 
-    const avatar = req.files["avatar"][0].filename;
-    const coverImg = req.files["coverImg"][0].filename;
     //check
     try {
         const user = await User.findOne({ address: walletaddr });
@@ -45,12 +41,7 @@ exports.editProfile = async (req, res) => {
         user.url = url;
         user.email = email;
         user.bio = bio;
-        user.facebook = facebook;
-        user.twitter = twitter;
-        user.discord = discord;
         if (req.files["avatar"]) user.avatar = req.files["avatar"][0].filename;
-        if (req.files["coverImg"])
-            user.coverImg = req.files["coverImg"][0].filename;
         await user.save();
         res.json({ resp: "Update Success", user: user });
     } catch (err) {
