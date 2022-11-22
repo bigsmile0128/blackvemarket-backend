@@ -10,6 +10,7 @@ const usersSchema = new Schema(
     bio: String,
     facebook: String,
     twitter: String,
+    instagram: String,
     discord: String,
     avatar: String,
     coverImg: String,

@@ -10,6 +10,8 @@ const nftSchema = new Schema({
     attributes: [{ type: Map }],
     meta_uri: String,
     valid: Boolean,
+    rank: Number,
+    rarity: Number,
 });
 
 module.exports = nftSchema;

@@ -26,5 +26,6 @@ const router = express.Router();
 router.post("/edit-profile", multiUpload, usersController.editProfile);
 router.post("/user-register", usersController.register);
 router.post("/get-profile", usersController.getProfile);
+router.get("/get-collected/:walletaddr", usersController.getCollected);
 
 module.exports = router;
