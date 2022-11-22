@@ -27,15 +27,15 @@ exports.addNFT = async (req, res) => {
   const { col_name, meta_json, token_id } = req.body;
 
   try {
-    let json = JSON.parse(meta_json);
+    // let json = JSON.parse(meta_json);
     const nftModel = mongoose.model(col_name, nftSchema);
     await nftModel.create({
       token_id: token_id,
-      // meta_uri: meta_json,
-      name: json.name,
-      description: json.description,
-      image: json.image,
-      attributes: json.attributes
+      meta_uri: meta_json,
+      // name: json.name,
+      // description: json.description,
+      // image: json.image,
+      // attributes: json.attributes
     });
   } catch (err) {
     console.log("model error ", err);
