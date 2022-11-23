@@ -60,11 +60,21 @@ exports.updateNFT = async (req, res) => {
 };
 
 exports.getNFTs = async (req, res) => {
-  const { col_name, start, limit } = req.body;
+  const { col_name, start, limit, sort } = req.body;
 
   try {
     const nftModel = mongoose.model(col_name, nftSchema);
-    const nfts = await nftModel.find({}).skip(start).limit(limit);
+    let sortFilter = {id: 1};
+    if ( sort == 0 ) {
+      sortFilter = {token_id: 1};
+    } else if ( sort == 1 ) {
+      sortFilter = {token_id: -1};
+    } else if ( sort == 2 ) {
+      sortFilter = {rarity: 1};
+    } else if ( sort == 3 ) {
+      sortFilter = {rarity: -1};
+    }
+    const nfts = await nftModel.find({}).sort(sortFilter).skip(start).limit(limit);
 
     res.status(200).json({
       status: "success",
