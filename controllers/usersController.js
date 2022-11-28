@@ -5,6 +5,7 @@ const { Driver, SimpleNet } = require('@vechain/connex-driver')
 const NFT_JSON = require("../abis/NFTs.json")
 const nftSchema = require("../models/nft_schema");
 const mongoose = require("mongoose");
+const { uploadFileToS3 } = require("../utils/aws");
 
 const NFT_ABI = NFT_JSON.abi;
 
@@ -120,10 +121,14 @@ exports.editProfile = async (req, res) => {
         user.bio = bio;
         user.twitter = twitter;
         user.instagram = instagram;
-        if (req.files["avatar"]) user.avatar = req.files["avatar"][0].filename;
+        if (req.files["avatar"]) {
+            const file_on_s3 = await uploadFileToS3(req.files["avatar"][0], "avatar");
+            user.avatar = file_on_s3;
+        }
         await user.save();
         res.json({ resp: "Update Success", user: user });
     } catch (err) {
+        console.log(err);
         res.status(500).json({ resp: "User not found" });
     }
 };
