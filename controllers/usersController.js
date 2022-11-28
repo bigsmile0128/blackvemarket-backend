@@ -47,8 +47,7 @@ const getConnex = async () => {
   }
 
 exports.getCollected = async (req, res) => {
-    const { walletaddr } = req.body;
-    // const walletaddr = "0x33A9d65bDA961a3B0eb9FDDA80F086097154fd49";
+    const { walletaddr } = req.params;
 
     try {
         const collections = await Collection.find({"type": {$ne: "test"}});
