@@ -229,7 +229,7 @@ exports.fixedPriceMarket = (req, res) => {
 };
 
 const getConnex = async () => {
-  const driver = await Driver.connect(new SimpleNet('https://testnet.veblocks.net'))
+  const driver = await Driver.connect(new SimpleNet('https://mainnet.veblocks.net'))
   const connex = new Framework(driver)
   return connex
 }
