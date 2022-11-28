@@ -22,6 +22,9 @@ const collectionsSchema = new Schema(
         symbol: String,
         description: String,
         col_name: String,
+        minting: Boolean,
+        bvm: Boolean,
+        no_nerds: Boolean,
     },
     {
         timestamps: true,
