@@ -43,7 +43,7 @@ exports.onCanceledAuction = async(req, res) => {
     const { saleId, wallet, created } = req.body;
 
     const auction = await Auctions.findOne({ saleId });
-    auction.isFinished = false;
+    auction.isFinished = true;
     await auction.save();
 
     res.status(200).json({
@@ -115,7 +115,7 @@ exports.onSaleCXL = async(req, res) => {
     const { saleId, wallet, created } = req.body;
 
     const auction = await Auctions.findOne({ saleId });
-    auction.isFinished = false;
+    auction.isFinished = true;
     await auction.save();
 
     res.status(200).json({
