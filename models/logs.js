@@ -4,8 +4,7 @@ const Schema = mongoose.Schema;
 const logsSchema = new Schema(
   {
     body: String,
-    query: String,
-    params: String,
+    txID: String,
   },
   {
     timestamps: true,

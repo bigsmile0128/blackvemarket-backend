@@ -40,6 +40,7 @@ router.post("/get-collection", collectionsController.getCollection);
 router.post("/add-nft", collectionsController.addNFT);
 router.post("/get-nfts", collectionsController.getNFTs);
 router.post("/get-itdetails", collectionsController.getItemDetails);
+router.post("/get-item-auction", collectionsController.getItemAuction);
 router.post("/nft", collectionsController.getNFTInfo);
 router.post("/get-allnfts", collectionsController.getAllNfts);
 router.post("/update-nft", collectionsController.updateNFT);

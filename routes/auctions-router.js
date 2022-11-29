@@ -13,4 +13,7 @@ router.post("/events/onNewSaleIdCreated", auctionsController.onNewSaleIdCreated)
 router.post("/events/onSaleCXL", auctionsController.onSaleCXL);
 router.post("/events/onRefunded", auctionsController.onRefunded);
 
+// router.post("/get-auction", auctionsController.getAuction);
+
+
 module.exports = router;

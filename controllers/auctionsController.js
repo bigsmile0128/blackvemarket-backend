@@ -19,7 +19,12 @@ exports.test = async(req, res) => {
 }
 
 exports.onCreatedAuction = async(req, res) => {
-    const { saleId, wallet, contractAddr, tokenId, minPrice, fixedPrice, created, duration } = req.body;
+    const { saleId, wallet, contractAddr, tokenId, minPrice, fixedPrice, created, duration, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const newAuction = new Auctions();
     newAuction.saleId = saleId;
@@ -40,7 +45,12 @@ exports.onCreatedAuction = async(req, res) => {
 }
 
 exports.onCanceledAuction = async(req, res) => {
-    const { saleId, wallet, created } = req.body;
+    const { saleId, wallet, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const auction = await Auctions.findOne({ saleId });
     auction.isFinished = true;
@@ -52,7 +62,12 @@ exports.onCanceledAuction = async(req, res) => {
 }
 
 exports.onChangedAuctionPrice = async(req, res) => {
-    const { saleId, wallet, price, created } = req.body;
+    const { saleId, wallet, price, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const auction = await Auctions.findOne({ saleId });
     auction.price = price;
@@ -64,7 +79,12 @@ exports.onChangedAuctionPrice = async(req, res) => {
 }
 
 exports.onNewHighestOffer = async(req, res) => {
-    const { saleId, wallet, amount, created } = req.body;
+    const { saleId, wallet, amount, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
     
     const auction = await Auctions.findOne({ saleId });
     const newOffer = new Offers();
@@ -81,7 +101,12 @@ exports.onNewHighestOffer = async(req, res) => {
 }
 
 exports.onFixedBought = async(req, res) => {
-    const { saleId, wallet, contractAddr, tokenId, amount, created } = req.body;
+    const { saleId, wallet, contractAddr, tokenId, amount, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const auction = await Auctions.findOne({ saleId });
     auction.isFinished = true;
@@ -93,7 +118,12 @@ exports.onFixedBought = async(req, res) => {
 }
 
 exports.onClaimed = async(req, res) => {
-    const { saleId, wallet, contractAddr, tokenId, amount, created } = req.body;
+    const { saleId, wallet, contractAddr, tokenId, amount, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const auction = await Auctions.findOne({ saleId });
     auction.isFinished = true;
@@ -112,7 +142,12 @@ exports.onNewSaleIdCreated = async(req, res) => {
 }
 
 exports.onSaleCXL = async(req, res) => {
-    const { saleId, wallet, created } = req.body;
+    const { saleId, wallet, created, txID } = req.body;
+
+    let newLogs = new Logs();
+    newLogs.body = JSON.stringify(req.body);
+    newLogs.txID = txID;
+    await newLogs.save();
 
     const auction = await Auctions.findOne({ saleId });
     auction.isFinished = true;

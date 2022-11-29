@@ -7,6 +7,12 @@ const mongoose = require("mongoose");
 const { Framework } = require('@vechain/connex-framework')
 const { Driver, SimpleNet } = require('@vechain/connex-driver')
 const BlackVeMarket_JSON = require("../abis/BlackVeMarket.json")
+const Auctions = require("../models/auctions");
+const Offers = require("../models/offers");
+const NFT_JSON = require("../abis/NFTs.json")
+const Logs = require("../models/logs");
+
+const NFT_ABI = NFT_JSON.abi;
 
 const BlackVeMarket_ABI = BlackVeMarket_JSON.abi;
 const BlackVeMarket_Address = BlackVeMarket_JSON.address;
@@ -91,6 +97,74 @@ exports.getNFTs = async (req, res) => {
     });
   }
 };
+
+const getTokenOwner = async (address, tokenId) => {
+  const connex = await getConnex();
+
+  const abiTokenURI = NFT_ABI.find(({name}) => name === "ownerOf");
+  console.log(abiTokenURI);
+  console.log(address);
+  console.log(tokenId);
+  const result = await connex.thor
+        .account(address)
+        .method(abiTokenURI)
+        .call(tokenId);
+
+    return result.decoded[0];
+}
+
+exports.getItemAuction = async (req, res) => {
+  const { address, token_id, event } = req.body;
+
+  try {
+    if ( event != 0 ) {
+      while (true) {
+        const txIDLog = await Logs.findOne({txID: event});
+        if ( txIDLog && txIDLog.txID ) {
+          break;
+        }
+      }
+    }
+    const owner = await getTokenOwner(address, token_id);
+    
+    const timeNow = Date.now() / 1000;
+    const auction = await Auctions.findOne({
+      contractAddr: address,
+      tokenId: token_id,
+      isFinished: false,
+    }).sort('-startedAt');
+    let isAuctionLive = false;
+    if ( auction ) {
+      isAuctionLive = auction['startedAt'] < timeNow && auction['startedAt'] + auction['duration'] > timeNow;
+    }
+
+    let ownerUser = null;
+    if ( owner == BlackVeMarket_Address && auction ) {
+      ownerUser = await User.findOne({ address: auction['seller'] });
+    } else {
+      ownerUser = await User.findOne({ address: owner });
+    }
+    const offers = auction && isAuctionLive?await Offers.find({auction_id: auction['_id']}).sort('-price'):[];
+    const highestOffer = offers.length > 0 ? offers[0] : null;
+
+    res.status(200).json({
+      status: "success",
+      owner,
+      ownerUser,
+      auction,
+      offers,
+      highestOffer,
+      saleId: auction?auction['saleId']:0,
+    });
+
+  } catch (err) {
+    console.log("model error ", err);
+    res.status(400).json({
+      status: "fail",
+      msg: "getNFT failed",
+    });
+  }
+}
 
 exports.getItemDetails = async (req, res) => {
   const { col_name, token_id } = req.body;
@@ -229,14 +303,38 @@ exports.fixedPriceMarket = (req, res) => {
 };
 
 const getConnex = async () => {
-  const driver = await Driver.connect(new SimpleNet('https://mainnet.veblocks.net'))
+  const driver = await Driver.connect(new SimpleNet('https://testnet.veblocks.net'))
   const connex = new Framework(driver)
   return connex
 }
 
 exports.getLiveAuctions = async (req, res) => {
   try {
-    const connex = await getConnex();
+    const timeNow = Date.now() / 1000;
+    const auctions = await Auctions.find({
+      isFinished: false,
+      startedAt: {"$lt": timeNow},
+      "$expr": {
+        "$gt": [ {"$sum": ['$startedAt', '$duration']}, timeNow ],
+      }
+    });
+
+    const liveAuctions = [];
+    
+    for ( const auction of auctions ) {
+      const collection = await Collections.findOne({ address: auction['contractAddr'] });
+      const nftModel = mongoose.model(collection['col_name'], nftSchema);
+      const details = await nftModel.findOne({ token_id: auction['tokenId'] });
+      const offer = await Offers.findOne({auction_id: auction['_id']}).sort('-price');
+      liveAuctions.push({
+          auctionSale: auction,
+          saleId: auction['saleId'],
+          offer,
+          collection,
+          details
+      });
+    }
+    /*const connex = await getConnex();
 
     const abiSalesCount = BlackVeMarket_ABI.find(({name}) => name === "salesCount");
           
@@ -278,7 +376,7 @@ exports.getLiveAuctions = async (req, res) => {
                 details
             });
         }
-    }
+    }*/
 
     res.status(200).json({
       status: "success",
