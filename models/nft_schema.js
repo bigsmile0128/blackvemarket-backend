@@ -13,5 +13,6 @@ const nftSchema = new Schema({
     rank: Number,
     rarity: Number,
 });
+nftSchema.index({ token_id: 1 }, { unique: true });
 
 module.exports = nftSchema;

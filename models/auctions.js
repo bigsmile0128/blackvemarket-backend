@@ -17,5 +17,6 @@ const auctionsSchema = new Schema(
     timestamps: true,
   }
 );
+auctionsSchema.index({ saleId: 1 }, { unique: true });
 
 module.exports = mongoose.model("auctions", auctionsSchema);

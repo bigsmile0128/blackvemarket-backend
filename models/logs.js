@@ -10,5 +10,6 @@ const logsSchema = new Schema(
     timestamps: true,
   }
 );
+logsSchema.index({ txID: 1 }, { unique: true });
 
 module.exports = mongoose.model("logs", logsSchema);

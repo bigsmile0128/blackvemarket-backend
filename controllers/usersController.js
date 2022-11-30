@@ -6,6 +6,8 @@ const NFT_JSON = require("../abis/NFTs.json")
 const nftSchema = require("../models/nft_schema");
 const mongoose = require("mongoose");
 const { uploadFileToS3 } = require("../utils/aws");
+const Auctions = require("../models/auctions");
+const Offers = require("../models/offers");
 
 const NFT_ABI = NFT_JSON.abi;
 
@@ -48,15 +50,18 @@ const getConnex = async () => {
 
 exports.getCollected = async (req, res) => {
     const { walletaddr } = req.params;
+    // const walletaddr = "0x58b3157e5b63c76864562dff7f5f4c60b72e33cd";
 
     try {
-        const collections = await Collection.find({"type": {$ne: "test"}});
+        const collections = await Collection.find({"type": "test"}).lean().exec();
+        const collection_by_address = [];
 
         const abiBalanceOf = NFT_ABI.find(({name}) => name === "balanceOf");
         const connex = await getConnex();
 
         const nft_list = [];
         for ( const collection of collections ) {
+            collection_by_address[collection["address"]] = collection;
             const resultCount = await connex.thor
                 .account(collection.address)
                 .method(abiBalanceOf)
@@ -82,21 +87,43 @@ exports.getCollected = async (req, res) => {
                             .account(collection.address)
                             .method(abiTokenOfOwnerByIndex)
                             .call(walletaddr, i);
-                            nft_ids.push(resultTokenOfOwnerByIndex.decoded[0]);
+                        nft_ids.push(resultTokenOfOwnerByIndex.decoded[0]);
                     }
                 }
 
                 const nftModel = mongoose.model(collection.col_name, nftSchema);
-                const nfts = await nftModel.find({"token_id": {"$in": nft_ids}});
+                const nfts = await nftModel.find({"token_id": {"$in": nft_ids}}).lean().exec();
 
                 for ( const nft of nfts ) {
                     nft_list.push({
                         collection,
-                        nft
+                        nft,
+                        listed: false
                     });
                 }
             }
         }
+        
+        const auctions = await Auctions.find({
+            seller: walletaddr,
+            isFinished: false,
+        }).sort('-startedAt').lean().exec();
+
+        for ( const auction of auctions ) {
+            const collection = collection_by_address[auction["contractAddr"]];
+            const nftModel = mongoose.model(collection.col_name, nftSchema);
+            const nft = await nftModel.findOne({"token_id": auction["tokenId"]}).lean().exec();
+            const offer = await Offers.findOne({auction_id: auction['_id']}).sort('-price').lean().exec();
+            nft_list.push({
+                collection,
+                nft,
+                listed: true,
+                auction,
+                offer,
+                price: offer?offer['price']:auction['price'],
+            });
+        }
+
         res.status(200).json({
             status: "success",
             walletaddr,

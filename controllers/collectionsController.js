@@ -11,6 +11,8 @@ const Auctions = require("../models/auctions");
 const Offers = require("../models/offers");
 const NFT_JSON = require("../abis/NFTs.json")
 const Logs = require("../models/logs");
+// import _ from 'lodash';
+const _ = require("lodash");
 
 const NFT_ABI = NFT_JSON.abi;
 
@@ -69,21 +71,66 @@ exports.updateNFT = async (req, res) => {
 };
 
 exports.getNFTs = async (req, res) => {
-  const { col_name, start, limit, sort } = req.body;
+  const { col_name, start, limit, sort, filter } = req.body;
 
   try {
     const nftModel = mongoose.model(col_name, nftSchema);
-    let sortFilter = {id: 1};
-    if ( sort == 0 ) {
-      sortFilter = {token_id: 1};
-    } else if ( sort == 1 ) {
-      sortFilter = {token_id: -1};
-    } else if ( sort == 2 ) {
-      sortFilter = {rarity: 1};
-    } else if ( sort == 3 ) {
-      sortFilter = {rarity: -1};
+    const collection = await Collections.findOne({ col_name }).lean().exec();
+    let nfts = await nftModel.find({}).lean().exec();//.skip(start).limit(limit).lean().exec();
+
+    const timeNow = Date.now() / 1000;
+    const auctions = await Auctions.find({
+      isFinished: false,
+      contractAddr: collection["address"],
+      isAuction: true,
+      startedAt: {"$lt": timeNow},
+      "$expr": {
+        "$gt": [ {"$sum": ['$startedAt', '$duration']}, timeNow ],
+      }
+    }).lean().exec();
+    const auctions_fixed = await Auctions.find({
+      isFinished: false,
+      contractAddr: collection["address"],
+      isAuction: false
+    }).lean().exec();
+    const auctions_by_token_id = [];
+    for ( const auction of auctions ) {
+      auctions_by_token_id[auction["tokenId"]] = auction;
     }
-    const nfts = await nftModel.find({}).sort(sortFilter).skip(start).limit(limit);
+    for ( const auction of auctions_fixed ) {
+      auctions_by_token_id[auction["tokenId"]] = auction;
+    }
+
+    for ( var i = 0; i < nfts.length; i ++ ) {
+      const nft = nfts[i];
+      if ( auctions_by_token_id[nft["token_id"]] ) {
+        nft["auction"] = auctions_by_token_id[nft["token_id"]];
+        const highestOffer = await Offers.findOne({auction_id: auctions_by_token_id[nft["token_id"]]['_id']}).sort('-price').lean().exec();
+        nft["offer"] = highestOffer;
+        nft["price"] = highestOffer?nft["offer"]["price"]:nft["auction"]["price"];
+        nfts[i] = nft;
+      }
+    }
+
+    if ( filter == 1 ) {
+      nfts = nfts.filter((item) => item.auction != null);
+    }
+    if ( sort == 0 ) {
+      nfts = _.orderBy(nfts, 'token_id', 'asc');
+    } else if ( sort == 1 ) {
+      nfts = _.orderBy(nfts, 'token_id', 'desc');
+    } else if ( sort == 2 ) {
+      nfts = _.orderBy(nfts, ['rank', 'token_id'], ['asc', 'asc']);
+    } else if ( sort == 3 ) {
+      nfts = _.orderBy(nfts, ['rank', 'token_id'], ['desc', 'asc']);
+    } else if ( sort == 4 ) {
+      nfts = _.orderBy(nfts, 'price', 'asc');
+    } else if ( sort == 5 ) {
+      nfts = _.orderBy(nfts, [(o)=>o.price||0], 'desc');
+    } else if ( sort == 6 ) {
+      nfts = _.orderBy(nfts, [(o)=>o.auction?o.auction.startedAt:0], 'desc');
+    }
+    nfts = nfts.splice(start, limit);
 
     res.status(200).json({
       status: "success",
@@ -102,9 +149,6 @@ const getTokenOwner = async (address, tokenId) => {
   const connex = await getConnex();
 
   const abiTokenURI = NFT_ABI.find(({name}) => name === "ownerOf");
-  console.log(abiTokenURI);
-  console.log(address);
-  console.log(tokenId);
   const result = await connex.thor
         .account(address)
         .method(abiTokenURI)
@@ -118,8 +162,10 @@ exports.getItemAuction = async (req, res) => {
 
   try {
     if ( event != 0 ) {
+      const connex = await getConnex();
       while (true) {
-        const txIDLog = await Logs.findOne({txID: event});
+        await connex.thor.ticker().next();
+        const txIDLog = await Logs.findOne({txID: event}).lean().exec();
         if ( txIDLog && txIDLog.txID ) {
           break;
         }
@@ -140,12 +186,17 @@ exports.getItemAuction = async (req, res) => {
 
     let ownerUser = null;
     if ( owner == BlackVeMarket_Address && auction ) {
-      ownerUser = await User.findOne({ address: auction['seller'] });
+      ownerUser = await User.findOne({ address: auction['seller'] }).lean().exec();
     } else {
-      ownerUser = await User.findOne({ address: owner });
+      ownerUser = await User.findOne({ address: owner }).lean().exec();
     }
-    const offers = auction && isAuctionLive?await Offers.find({auction_id: auction['_id']}).sort('-price'):[];
+    const offers = auction && isAuctionLive?await Offers.find({auction_id: auction['_id']}).sort('-price').lean().exec():[];
     const highestOffer = offers.length > 0 ? offers[0] : null;
+
+    for ( var i = 0; i < offers.length; i ++ ) {
+      const userOffer = await User.findOne({ address: offers[i].buyer }).lean().exec();
+      offers[i]['user'] = userOffer;
+    }
 
     res.status(200).json({
       status: "success",
@@ -171,8 +222,8 @@ exports.getItemDetails = async (req, res) => {
 
   try {
     const nftModel = mongoose.model(col_name, nftSchema);
-    const collection = await Collections.findOne({ col_name });
-    const details = await nftModel.findOne({ token_id: token_id });
+    const collection = await Collections.findOne({ col_name }).lean().exec();
+    const details = await nftModel.findOne({ token_id: token_id }).lean().exec();
 
     res.status(200).json({
       status: "success",
@@ -192,9 +243,9 @@ exports.getNFTInfo = async (req, res) => {
   const { address, token_id } = req.body;
 
   try {
-    const collection = await Collections.findOne({ address });
+    const collection = await Collections.findOne({ address }).lean().exec();
     const nftModel = mongoose.model(collection['col_name'], nftSchema);
-    const details = await nftModel.findOne({ token_id: token_id });
+    const details = await nftModel.findOne({ token_id: token_id }).lean().exec();
 
     res.status(200).json({
       status: "success",
@@ -219,7 +270,7 @@ exports.getAllNfts = async (req, res) => {
     await Promise.all(
       col_names.map(async (item) => {
         const nftModel = mongoose.model(item.field, nftSchema);
-        const nfts = await nftModel.find({}).skip(start).limit(limit);
+        const nfts = await nftModel.find({}).skip(start).limit(limit).lean().exec();
         allnfts.push(...nfts);
       })
     );
@@ -263,17 +314,14 @@ exports.createCollection = (req, res) => {
   });
 };
 
-exports.getCollections = (req, res) => {
-  Collections.find()
-    .then((collections) => {
-      res.status(200).json({ collections });
-    })
-    .catch((err) => console.log(err));
+exports.getCollections = async (req, res) => {
+  const collections = await Collections.find().lean().exec();
+  res.status(200).json({ collections });
 };
 
 exports.getCollection = async (req, res) => {
   const { symbol } = req.body;
-  const collection = await Collections.findOne({ symbol });
+  const collection = await Collections.findOne({ symbol }).lean().exec();
 
   res.status(200).json({
     status: "success",
@@ -303,7 +351,7 @@ exports.fixedPriceMarket = (req, res) => {
 };
 
 const getConnex = async () => {
-  const driver = await Driver.connect(new SimpleNet('https://testnet.veblocks.net'))
+  const driver = await Driver.connect(new SimpleNet('https://mainnet.veblocks.net'))
   const connex = new Framework(driver)
   return connex
 }
@@ -311,25 +359,46 @@ const getConnex = async () => {
 exports.getLiveAuctions = async (req, res) => {
   try {
     const timeNow = Date.now() / 1000;
-    const auctions = await Auctions.find({
+    let auctions = await Auctions.find({
       isFinished: false,
+      isAuction: true,
       startedAt: {"$lt": timeNow},
       "$expr": {
         "$gt": [ {"$sum": ['$startedAt', '$duration']}, timeNow ],
       }
-    });
+    }).lean().exec();
 
     const liveAuctions = [];
     
     for ( const auction of auctions ) {
-      const collection = await Collections.findOne({ address: auction['contractAddr'] });
+      const collection = await Collections.findOne({ address: auction['contractAddr'] }).lean().exec();
       const nftModel = mongoose.model(collection['col_name'], nftSchema);
-      const details = await nftModel.findOne({ token_id: auction['tokenId'] });
-      const offer = await Offers.findOne({auction_id: auction['_id']}).sort('-price');
+      const details = await nftModel.findOne({ token_id: auction['tokenId'] }).lean().exec();
+      const offer = await Offers.findOne({auction_id: auction['_id']}).sort('-price').lean().exec();
       liveAuctions.push({
           auctionSale: auction,
           saleId: auction['saleId'],
           offer,
+          price: offer['price'],
+          collection,
+          details
+      });
+    }
+
+    auctions = await Auctions.find({
+      isFinished: false,
+      isAuction: false,
+    }).lean().exec();
+    
+    for ( const auction of auctions ) {
+      const collection = await Collections.findOne({ address: auction['contractAddr'] }).lean().exec();
+      const nftModel = mongoose.model(collection['col_name'], nftSchema);
+      const details = await nftModel.findOne({ token_id: auction['tokenId'] }).lean().exec();
+      liveAuctions.push({
+          auctionSale: auction,
+          saleId: auction['saleId'],
+          offer: null,
+          price: auction['price'],
           collection,
           details
       });

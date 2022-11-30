@@ -30,5 +30,6 @@ const collectionsSchema = new Schema(
         timestamps: true,
     }
 );
+collectionsSchema.index({ col_name: 1, address: 1 }, { unique: true });
 
 module.exports = mongoose.model("collections", collectionsSchema);
