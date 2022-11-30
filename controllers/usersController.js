@@ -53,7 +53,7 @@ exports.getCollected = async (req, res) => {
     // const walletaddr = "0x58b3157e5b63c76864562dff7f5f4c60b72e33cd";
 
     try {
-        const collections = await Collection.find({"type": "test"}).lean().exec();
+        const collections = await Collection.find({"type": {"$ne": "test"}}).lean().exec();
         const collection_by_address = [];
 
         const abiBalanceOf = NFT_ABI.find(({name}) => name === "balanceOf");
