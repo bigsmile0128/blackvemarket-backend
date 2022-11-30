@@ -379,7 +379,7 @@ exports.getLiveAuctions = async (req, res) => {
           auctionSale: auction,
           saleId: auction['saleId'],
           offer,
-          price: offer['price'],
+          price: offer?offer['price']:auction['price'],
           collection,
           details
       });
