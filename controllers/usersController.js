@@ -61,7 +61,7 @@ exports.getCollected = async (req, res) => {
 
         const nft_list = [];
         for ( const collection of collections ) {
-            collection_by_address[collection["address"]] = collection;
+            collection_by_address[collection["address"].toLowerCase()] = collection;
             const resultCount = await connex.thor
                 .account(collection.address)
                 .method(abiBalanceOf)
@@ -110,7 +110,7 @@ exports.getCollected = async (req, res) => {
         }).sort('-startedAt').lean().exec();
 
         for ( const auction of auctions ) {
-            const collection = collection_by_address[auction["contractAddr"]];
+            const collection = collection_by_address[auction["contractAddr"].toLowerCase()];
             const nftModel = mongoose.model(collection.col_name, nftSchema);
             const nft = await nftModel.findOne({"token_id": auction["tokenId"]}).lean().exec();
             const offer = await Offers.findOne({auction_id: auction['_id']}).sort('-price').lean().exec();
