@@ -25,6 +25,7 @@ const collectionsSchema = new Schema(
         minting: Boolean,
         bvm: Boolean,
         no_nerds: Boolean,
+        royalty: Number,
     },
     {
         timestamps: true,
