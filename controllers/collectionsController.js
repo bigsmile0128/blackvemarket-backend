@@ -75,7 +75,7 @@ exports.getNFTs = async (req, res) => {
 
   try {
     const nftModel = mongoose.model(col_name, nftSchema);
-    const collection = await Collections.findOne({ col_name }).lean().exec();
+    const collection = await Collections.findOne({ col_name });;;
     let nfts = await nftModel.find({}).lean().exec();//.skip(start).limit(limit).lean().exec();
 
     const timeNow = Date.now() / 1000;
