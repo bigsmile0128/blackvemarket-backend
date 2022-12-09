@@ -5,6 +5,8 @@ const Offers = require("../models/offers");
 const Collections = require("../models/collections");
 const nftSchema = require("../models/nft_schema");
 const mongoose = require("mongoose");
+const { Framework } = require("@vechain/connex-framework");
+const { Driver, SimpleNet } = require("@vechain/connex-driver");
 
 exports.test = async (req, res) => {
     let newLogs = new Logs();
@@ -178,11 +180,27 @@ exports.onRefunded = async (req, res) => {
     });
 };
 
+const getConnex = async () => {
+    const driver = await Driver.connect(
+        new SimpleNet("https://mainnet.veblocks.net")
+    );
+    const connex = new Framework(driver);
+    return connex;
+};
+
 exports.onTransferNFT = async (req, res) => {
-    const { from, to, tokenId, contractAddr, txID } = req.body;
+    const { from, to, tokenId, txID, clauseIndex } = req.body;
 
     try {
-        const collection = await Collections.findOne({ address: contractAddr });
+        const connex = await getConnex();
+        const txVisitor = connex.thor.transaction(txID);
+        const transactionData = await txVisitor.get();
+        const clause = transactionData["clauses"][clauseIndex];
+        const contract_address = clause["to"];
+
+        const collection = await Collections.findOne({
+            address: contract_address,
+        });
 
         if (collection) {
             const nftModel = mongoose.model(collection["col_name"], nftSchema);
