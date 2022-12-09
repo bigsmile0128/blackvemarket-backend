@@ -230,6 +230,8 @@ exports.onTransferNFT = async (req, res) => {
                         owner: to.toLowerCase(),
                     });
                 }
+            } else if (to === "0x0000000000000000000000000000000000000000") {
+                await nftModel.deleteOne({ token_id: tokenId });
             } else {
                 await nftModel.updateOne(
                     { token_id: tokenId },
