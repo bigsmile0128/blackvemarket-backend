@@ -190,10 +190,7 @@ exports.onTransferNFT = async (req, res) => {
         const collection = await Collections.findOne({ address: contractAddr });
 
         if (collection) {
-            const nftModel = mongoose
-                .model(collection["col_name"], nftSchema)
-                .lean()
-                .exec();
+            const nftModel = mongoose.model(collection["col_name"], nftSchema);
             if (from == "0") {
                 message = "mint";
             } else {
