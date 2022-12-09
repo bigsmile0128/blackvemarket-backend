@@ -3,6 +3,7 @@ const Auctions = require("../models/auctions");
 const Offers = require("../models/offers");
 const Collections = require("../models/collections");
 const nftSchema = require("../models/nft_schema");
+const mongoose = require("mongoose");
 
 exports.test = async (req, res) => {
     let newLogs = new Logs();
@@ -203,6 +204,11 @@ exports.onTransferNFT = async (req, res) => {
         res.status(200).json({
             status: "success",
             message,
+            from,
+            to,
+            tokenId,
+            contractAddr,
+            txID,
         });
     } catch (err) {
         res.status(400).json({
