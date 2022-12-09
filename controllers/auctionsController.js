@@ -177,30 +177,38 @@ exports.onRefunded = async (req, res) => {
 };
 
 exports.onTransferNFT = async (req, res) => {
-    const { from, to, tokenId, contractAddr, txID } = req.body;
-    let msg = "normal";
+    try {
+        const { from, to, tokenId, contractAddr, txID } = req.body;
+        let msg = "normal";
 
-    let newLogs = new Logs();
-    newLogs.body = JSON.stringify(req.body);
-    newLogs.txID = txID;
-    await newLogs.save();
+        let newLogs = new Logs();
+        newLogs.body = JSON.stringify(req.body);
+        newLogs.txID = txID;
+        await newLogs.save();
 
-    const collection = await Collections.findOne({ address: contractAddr });
+        const collection = await Collections.findOne({ address: contractAddr });
 
-    if (collection) {
-        const nftModel = mongoose
-            .model(collection["col_name"], nftSchema)
-            .lean()
-            .exec();
-        if (from == "0") {
-            message = "mint";
-        } else {
-            message = "transfer";
+        if (collection) {
+            const nftModel = mongoose
+                .model(collection["col_name"], nftSchema)
+                .lean()
+                .exec();
+            if (from == "0") {
+                message = "mint";
+            } else {
+                message = "transfer";
+            }
         }
-    }
 
-    res.status(200).json({
-        status: "success",
-        message,
-    });
+        res.status(200).json({
+            status: "success",
+            message,
+        });
+    } catch (err) {
+        res.status(400).json({
+            status: "fail",
+            msg: "onTransferNFT failed",
+            err,
+        });
+    }
 };
