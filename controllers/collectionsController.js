@@ -219,7 +219,16 @@ exports.getItemAuction = async (req, res) => {
                 }
             }
         }
-        const owner = await getTokenOwner(address, token_id);
+
+        const collection = await Collections.findOne({ address }).lean().exec();
+        const nftModel = mongoose.model(collection["col_name"], nftSchema);
+        const nft_item = await nftModel
+            .findOne({ token_id: token_id })
+            .lean()
+            .exec();
+        const owner = nft_item["owner"]
+            ? nft_item["owner"]
+            : await getTokenOwner(address, token_id);
 
         const timeNow = Date.now() / 1000;
         const auction = await Auctions.findOne({
