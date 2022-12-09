@@ -1,3 +1,4 @@
+const fetch = require("node-fetch");
 const Logs = require("../models/logs");
 const Auctions = require("../models/auctions");
 const Offers = require("../models/offers");
@@ -178,36 +179,64 @@ exports.onRefunded = async (req, res) => {
 };
 
 exports.onTransferNFT = async (req, res) => {
+    const { from, to, tokenId, contractAddr, txID } = req.body;
+
     try {
-        const { from, to, tokenId, contractAddr, txID } = req.body;
-        let msg = "normal";
+        const collection = await Collections.findOne({ address: contractAddr });
+
+        if (collection) {
+            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            if (from === "0x0000000000000000000000000000000000000000") {
+                let meta_uri = collection["meta_uri"];
+                let image_uri = collection["image_uri"];
+                if (meta_uri) {
+                    meta_uri = meta_uri.replace("{id}", tokenId);
+                    image_uri = image_uri.replace("{id}", tokenId);
+
+                    let meta_json;
+                    await fetch(meta_uri)
+                        .then((data) => data.json())
+                        .then((data) => {
+                            meta_json = data;
+                        })
+                        .catch((err) => console.log(err));
+
+                    await nftModel.create({
+                        token_id: tokenId + 1000,
+                        name: meta_json?.name ? meta_json?.name : "#" + tokenId,
+                        description: meta_json?.description ?? "",
+                        image: image_uri,
+                        attributes: meta_json?.attributes,
+                        rank: meta_json?.rank,
+                        rarity: meta_json?.rarity,
+                        owner: to.toLowerCase(),
+                    });
+                }
+            } else {
+                await nftModel.updateOne(
+                    { token_id: tokenId },
+                    { $set: { owner: to.toLowerCase() } }
+                );
+            }
+        }
 
         let newLogs = new Logs();
         newLogs.body = JSON.stringify(req.body);
         newLogs.txID = txID;
         await newLogs.save();
 
-        const collection = await Collections.findOne({ address: contractAddr });
-
-        if (collection) {
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
-            if (from == "0") {
-                message = "mint";
-            } else {
-                message = "transfer";
-            }
-        }
-
         res.status(200).json({
             status: "success",
-            message,
-            from,
-            to,
-            tokenId,
-            contractAddr,
-            txID,
         });
     } catch (err) {
+        let newLogs = new Logs();
+        newLogs.body = JSON.stringify(req.body);
+        newLogs.txID = txID;
+        newLogs.success = false;
+        newLogs.msg = err;
+        await newLogs.save();
+
+        console.log(err);
         res.status(400).json({
             status: "fail",
             msg: "onTransferNFT failed",

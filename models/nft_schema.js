@@ -12,6 +12,7 @@ const nftSchema = new Schema({
     valid: Boolean,
     rank: Number,
     rarity: Number,
+    owner: String,
 });
 nftSchema.index({ token_id: 1 }, { unique: true });
 

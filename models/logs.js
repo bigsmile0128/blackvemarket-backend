@@ -2,13 +2,15 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const logsSchema = new Schema(
-  {
-    body: String,
-    txID: String,
-  },
-  {
-    timestamps: true,
-  }
+    {
+        body: String,
+        txID: String,
+        success: Boolean,
+        msg: String,
+    },
+    {
+        timestamps: true,
+    }
 );
 logsSchema.index({ txID: 1 }, { unique: true });
 

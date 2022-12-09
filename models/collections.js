@@ -26,6 +26,8 @@ const collectionsSchema = new Schema(
         bvm: Boolean,
         no_nerds: Boolean,
         royalty: Number,
+        meta_uri: String,
+        image_uri: String,
     },
     {
         timestamps: true,
