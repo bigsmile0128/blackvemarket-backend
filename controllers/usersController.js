@@ -62,6 +62,7 @@ exports.getCollected = async (req, res) => {
         const nft_list = [];
 
         for (const collection of collections) {
+            collection_by_address[collection["address"].toLowerCase()] = collection;
             const nftModel = mongoose.model(collection.col_name, nftSchema);
             const nfts = await nftModel.find({ "owner": walletaddr.toLowerCase() }).lean().exec();
 
