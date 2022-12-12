@@ -220,7 +220,7 @@ exports.onTransferNFT = async (req, res) => {
                         .catch((err) => console.log(err));
 
                     await nftModel.create({
-                        token_id: tokenId + 1000,
+                        token_id: tokenId,
                         name: meta_json?.name ? meta_json?.name : "#" + tokenId,
                         description: meta_json?.description ?? "",
                         image: image_uri,
@@ -229,6 +229,8 @@ exports.onTransferNFT = async (req, res) => {
                         rarity: meta_json?.rarity,
                         owner: to.toLowerCase(),
                     });
+
+                    await Collections.updateOne({ address: contract_address }, { $set: { total_supply: collection["total_supply"] * 1 + 1 } });
                 }
             } else if (to === "0x0000000000000000000000000000000000000000") {
                 await nftModel.deleteOne({ token_id: tokenId });
