@@ -192,6 +192,12 @@ exports.onTransferNFT = async (req, res) => {
     const { from, to, tokenId, txID, clauseIndex } = req.body;
 
     try {
+
+        let newLogs = new Logs();
+        newLogs.body = JSON.stringify(req.body);
+        newLogs.txID = txID;
+        await newLogs.save();
+
         const connex = await getConnex();
         const txVisitor = connex.thor.transaction(txID);
         const transactionData = await txVisitor.get();
@@ -241,11 +247,6 @@ exports.onTransferNFT = async (req, res) => {
                 );
             }
         }
-
-        let newLogs = new Logs();
-        newLogs.body = JSON.stringify(req.body);
-        newLogs.txID = txID;
-        await newLogs.save();
 
         res.status(200).json({
             status: "success",
