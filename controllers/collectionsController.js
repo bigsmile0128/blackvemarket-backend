@@ -252,11 +252,11 @@ exports.getItemAuction = async (req, res) => {
             ownerUser = await User.findOne({ address: owner }).lean().exec();
         }
         const offers =
-            auction && isAuctionLive
+            auction
                 ? await Offers.find({ auction_id: auction["_id"] })
-                      .sort("-price")
-                      .lean()
-                      .exec()
+                    .sort("-price")
+                    .lean()
+                    .exec()
                 : [];
         const highestOffer = offers.length > 0 ? offers[0] : null;
 
