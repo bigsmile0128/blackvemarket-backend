@@ -57,17 +57,18 @@ exports.getCollected = async (req, res) => {
 
         const nft_list = [];
 
+        const auctions = await Auctions.find({
+            seller: walletaddr,
+            isFinished: false,
+        }).sort('-startedAt').lean().exec();
+
         for (const collection of collections) {
             collection_by_address[collection["address"].toLowerCase()] = collection;
             const nftModel = mongoose.model(collection.col_name, nftSchema);
             const nfts = await nftModel.find({ "owner": walletaddr.toLowerCase() }).lean().exec();
 
             for (const nft of nfts) {
-                const auction = await Auctions.findOne({
-                    tokenId: nft["token_id"],
-                    contractAddr: collection["address"],
-                    isFinished: false,
-                });
+                const auction = auctions.filter((item) => (item.contractAddr == collection["address"] && item.tokenId == nft["token_id"]));
                 if (!auction) {
                     nft_list.push({
                         collection,
@@ -77,11 +78,6 @@ exports.getCollected = async (req, res) => {
                 }
             }
         }
-
-        const auctions = await Auctions.find({
-            seller: walletaddr,
-            isFinished: false,
-        }).sort('-startedAt').lean().exec();
 
         for (const auction of auctions) {
             const collection = collection_by_address[auction["contractAddr"].toLowerCase()];
