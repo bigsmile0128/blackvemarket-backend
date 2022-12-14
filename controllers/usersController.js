@@ -69,7 +69,7 @@ exports.getCollected = async (req, res) => {
 
             for (const nft of nfts) {
                 const auction = auctions.filter((item) => (item.contractAddr == collection["address"] && item.tokenId == nft["token_id"]));
-                if (!auction) {
+                if (auction.length == 0) {
                     nft_list.push({
                         collection,
                         nft,
