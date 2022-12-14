@@ -19,6 +19,7 @@ router.post(
 router.post("/events/onSaleCXL", auctionsController.onSaleCXL);
 router.post("/events/onRefunded", auctionsController.onRefunded);
 router.post("/events/onTransferNFT", auctionsController.onTransferNFT);
+router.get("/events/onTest", auctionsController.test);
 
 // router.post("/get-auction", auctionsController.getAuction);
 

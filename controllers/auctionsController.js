@@ -7,20 +7,87 @@ const nftSchema = require("../models/nft_schema");
 const mongoose = require("mongoose");
 const { Framework } = require("@vechain/connex-framework");
 const { Driver, SimpleNet } = require("@vechain/connex-driver");
+const BlackVeMarket_JSON = require("../abis/BlackVeMarket.json");
+const BlackVeMarket_Address = BlackVeMarket_JSON.address;
 
 exports.test = async (req, res) => {
-    let newLogs = new Logs();
-    newLogs.body = JSON.stringify(req.body);
-    newLogs.query = JSON.stringify(req.query);
-    newLogs.params = JSON.stringify(req.params);
-    await newLogs.save();
+    // const { from, to, tokenId, txID, clauseIndex } = req.body;
+    const from = "0xD9E3d649F80b09942177bb905E61b35364E4138D";
+    const to = "0xa6c48B784e7B96C4fDFB2Db33ECdDac43D733444";
+    const tokenId = "1020";
+    const txID = '0x7f18aedeeafea3c35c6bc9ab6410e35ed1849e97729dc81bfb77760501f260cc';
+    const clauseIndex = 1;
 
-    res.status(200).json({
-        status: "success",
-        body: JSON.stringify(req.body),
-        query: JSON.stringify(req.query),
-        params: JSON.stringify(req.params),
-    });
+    try {
+        const connex = await getConnex();
+        const txVisitor = connex.thor.transaction(txID);
+        const transactionData = await txVisitor.get();
+        const clause = transactionData["clauses"][clauseIndex];
+        let contract_address = clause["to"];
+
+        if (clauseIndex > 0 && contract_address == BlackVeMarket_Address) {
+            contract_address = transactionData["clauses"][0]["to"];
+        }
+
+        console.log(contract_address);
+        /*const collection = await Collections.findOne({
+            address: contract_address,
+        });
+        console.log(collection);
+
+        if (collection) {
+            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            console.log('1')
+            if (from === "0x0000000000000000000000000000000000000000") {
+                let meta_uri = collection["meta_uri"];
+                let image_uri = collection["image_uri"];
+                if (meta_uri) {
+                    meta_uri = meta_uri.replace("{id}", tokenId);
+                    image_uri = image_uri.replace("{id}", tokenId);
+
+                    let meta_json;
+                    await fetch(meta_uri)
+                        .then((data) => data.json())
+                        .then((data) => {
+                            meta_json = data;
+                        })
+                        .catch((err) => console.log(err));
+
+                    await nftModel.create({
+                        token_id: tokenId,
+                        name: meta_json?.name ? meta_json?.name : "#" + tokenId,
+                        description: meta_json?.description ?? "",
+                        image: image_uri,
+                        attributes: meta_json?.attributes,
+                        rank: meta_json?.rank,
+                        rarity: meta_json?.rarity,
+                        owner: to.toLowerCase(),
+                    });
+
+                    await Collections.updateOne({ address: contract_address }, { $set: { total_supply: collection["total_supply"] * 1 + 1 } });
+                }
+            } else if (to === "0x0000000000000000000000000000000000000000") {
+                await nftModel.deleteOne({ token_id: tokenId });
+            } else {
+                console.log('2')
+                await nftModel.updateOne(
+                    { token_id: tokenId },
+                    { $set: { owner: to.toLowerCase() } }
+                );
+            }
+        }*/
+
+        res.status(200).json({
+            status: "success",
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(400).json({
+            status: "fail",
+            msg: "test failed",
+            err,
+        });
+    }
 };
 
 exports.onCreatedAuction = async (req, res) => {
@@ -203,6 +270,10 @@ exports.onTransferNFT = async (req, res) => {
         const transactionData = await txVisitor.get();
         const clause = transactionData["clauses"][clauseIndex];
         const contract_address = clause["to"];
+
+        if (clauseIndex > 0 && contract_address == BlackVeMarket_Address) {
+            contract_address = transactionData["clauses"][0]["to"];
+        }
 
         const collection = await Collections.findOne({
             address: contract_address,
