@@ -226,9 +226,10 @@ exports.getItemAuction = async (req, res) => {
             .findOne({ token_id: token_id })
             .lean()
             .exec();
-        const owner = nft_item["owner"]
-            ? nft_item["owner"]
-            : await getTokenOwner(address, token_id);
+        // const owner = nft_item["owner"]
+        //     ? nft_item["owner"]
+        //     : await getTokenOwner(address, token_id);
+        const owner = await getTokenOwner(address, token_id);
 
         const timeNow = Date.now() / 1000;
         const auction = await Auctions.findOne({

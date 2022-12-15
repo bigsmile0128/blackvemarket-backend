@@ -304,7 +304,7 @@ exports.onTransferNFT = async (req, res) => {
                         attributes: meta_json?.attributes,
                         rank: meta_json?.rank,
                         rarity: meta_json?.rarity,
-                        owner: to.toLowerCase(),
+                        // owner: to.toLowerCase(),
                     });
 
                     await Collections.updateOne({ address: contract_address }, { $set: { total_supply: collection["total_supply"] * 1 + 1 } });
@@ -312,10 +312,10 @@ exports.onTransferNFT = async (req, res) => {
             } else if (to === "0x0000000000000000000000000000000000000000") {
                 await nftModel.deleteOne({ token_id: tokenId });
             } else {
-                await nftModel.updateOne(
-                    { token_id: tokenId },
-                    { $set: { owner: to.toLowerCase() } }
-                );
+                // await nftModel.updateOne(
+                //     { token_id: tokenId },
+                //     { $set: { owner: to.toLowerCase() } }
+                // );
             }
         }
 
