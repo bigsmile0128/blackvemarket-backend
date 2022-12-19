@@ -269,7 +269,7 @@ exports.onTransferNFT = async (req, res) => {
         const txVisitor = connex.thor.transaction(txID);
         const transactionData = await txVisitor.get();
         const clause = transactionData["clauses"][clauseIndex];
-        const contract_address = clause["to"];
+        let contract_address = clause["to"];
 
         if (clauseIndex > 0 && contract_address == BlackVeMarket_Address) {
             contract_address = transactionData["clauses"][0]["to"];
