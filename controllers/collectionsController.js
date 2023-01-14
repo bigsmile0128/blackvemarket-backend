@@ -38,7 +38,7 @@ exports.takeOwnership = async (req, res) => {
 
     try {
         const collection = await Collections.findOne({ col_name });
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const nft_list = await nftModel.find({}).lean().exec();
         for (const nft of nft_list) {
             const address = collection["address"];
@@ -65,7 +65,7 @@ exports.addNFT = async (req, res) => {
 
     try {
         let json = JSON.parse(meta_json);
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         await nftModel.create({
             token_id: token_id,
             name: json.name,
@@ -100,7 +100,7 @@ exports.updateNFT = async (req, res) => {
     const { col_name, token_id } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         await nftModel.updateOne(
             { token_id: token_id },
             { $set: { valid: true } }
@@ -155,7 +155,7 @@ exports.getNFTs = async (req, res) => {
     const { col_name, start, limit, sort, filters } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const collection = await Collections.findOne({ col_name });
         let nfts = await nftModel.find({}).lean().exec();
 
@@ -276,7 +276,7 @@ exports.getItemAuction = async (req, res) => {
         }
 
         const collection = await Collections.findOne({ address }).lean().exec();
-        const nftModel = mongoose.model(collection["col_name"], nftSchema);
+        const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
         const nft_item = await nftModel
             .findOne({ token_id: token_id })
             .lean()
@@ -345,7 +345,7 @@ exports.getItemDetails = async (req, res) => {
     const { col_name, token_id } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const collection = await Collections.findOne({ col_name })
             .lean()
             .exec();
@@ -373,7 +373,7 @@ exports.getNFTInfo = async (req, res) => {
 
     try {
         const collection = await Collections.findOne({ address }).lean().exec();
-        const nftModel = mongoose.model(collection["col_name"], nftSchema);
+        const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
         const details = await nftModel
             .findOne({ token_id: token_id })
             .lean()
@@ -397,7 +397,7 @@ exports.getTraits = async (req, res) => {
     const { col_name } = req.params;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const nft_list = await nftModel.find({}).lean().exec();
         const traits = {};
         for (const nft of nft_list) {
@@ -448,7 +448,7 @@ exports.getAllNfts = async (req, res) => {
     try {
         await Promise.all(
             col_names.map(async (item) => {
-                const nftModel = mongoose.model(item.field, nftSchema);
+                const nftModel = mongoose.model(item.field, nftSchema, item.field);
                 const nfts = await nftModel
                     .find({})
                     .skip(start)
@@ -565,7 +565,7 @@ exports.getLiveAuctions = async (req, res) => {
             })
                 .lean()
                 .exec();
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
             const details = await nftModel
                 .findOne({ token_id: auction["tokenId"] })
                 .lean()
@@ -597,7 +597,7 @@ exports.getLiveAuctions = async (req, res) => {
             })
                 .lean()
                 .exec();
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
             const details = await nftModel
                 .findOne({ token_id: auction["tokenId"] })
                 .lean()

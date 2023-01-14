@@ -90,7 +90,7 @@ exports.getCollected = async (req, res) => {
                     }
                 }
 
-                const nftModel = mongoose.model(collection.col_name, nftSchema);
+                const nftModel = mongoose.model(collection.col_name, nftSchema, collection.col_name);
                 const nfts = await nftModel.find({ "token_id": { "$in": nft_ids } }).lean().exec();
 
                 for (const nft of nfts) {
@@ -110,7 +110,7 @@ exports.getCollected = async (req, res) => {
 
         for (const auction of auctions) {
             const collection = collection_by_address[auction["contractAddr"].toLowerCase()];
-            const nftModel = mongoose.model(collection.col_name, nftSchema);
+            const nftModel = mongoose.model(collection.col_name, nftSchema, collection.col_name);
             const nft = await nftModel.findOne({ "token_id": auction["tokenId"] }).lean().exec();
             const offer = await Offers.findOne({ auction_id: auction['_id'] }).sort('-price').lean().exec();
             nft_list.push({
