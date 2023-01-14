@@ -9,6 +9,72 @@ const { Framework } = require("@vechain/connex-framework");
 const { Driver, SimpleNet } = require("@vechain/connex-driver");
 const BlackVeMarket_JSON = require("../abis/BlackVeMarket.json");
 const BlackVeMarket_Address = BlackVeMarket_JSON.address;
+const NFT_JSON = require("../abis/NFTs.json");
+const NFT_ABI = NFT_JSON.abi;
+
+const { thorify } = require("thorify");
+const Web3 = require("web3");
+
+const getTokenOwner = async (address, tokenId) => {
+    const connex = await getConnex();
+
+    const abiTokenURI = NFT_ABI.find(({ name }) => name === "ownerOf");
+    const result = await connex.thor
+        .account(address)
+        .method(abiTokenURI)
+        .call(tokenId);
+
+    return result.decoded[0];
+};
+
+
+const abi = [
+    {
+        'constant': false,
+        'inputs': [
+            {
+                'name': 'to',
+                'type': 'address'
+            },
+            {
+                'name': 'value',
+                'type': 'uint256'
+            }
+        ],
+        'name': 'transfer',
+        'outputs': [
+            {
+                'name': 'ok',
+                'type': 'bool'
+            }
+        ],
+        'payable': false,
+        'stateMutability': 'nonpayable',
+        'type': 'function'
+    }
+]
+
+exports.collection = async (req, res) => {
+    const { col_name, address, count } = req.params;
+    const nftModel = mongoose.model(col_name, nftSchema, col_name);
+    const _web3 = thorify(new Web3(), "https://sync-mainnet.vechain.org");
+    const _token = new _web3.eth.Contract(NFT_ABI, address);
+    for (var i = 1; i <= count; i++) {
+        try {
+            const owner = await _token.methods.ownerOf(i).call();
+            await nftModel.updateOne(
+                { token_id: i },
+                { $set: { owner: owner.toLowerCase() } }
+            );
+            console.log("Owner of token index " + i + ": " + owner);
+        } catch (e) {
+            console.log("Owner of token index " + i + ": None");
+        }
+    }
+    res.status(200).json({
+        data: "success",
+    });
+}
 
 exports.test = async (req, res) => {
     // const { from, to, tokenId, txID, clauseIndex } = req.body;

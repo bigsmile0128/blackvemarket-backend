@@ -11,6 +11,7 @@ const Auctions = require("../models/auctions");
 const Offers = require("../models/offers");
 const NFT_JSON = require("../abis/NFTs.json");
 const Logs = require("../models/logs");
+const NOffers = require("../models/noffers");
 // import _ from 'lodash';
 const _ = require("lodash");
 
@@ -67,14 +68,25 @@ exports.addNFT = async (req, res) => {
         const nftModel = mongoose.model(col_name, nftSchema);
         await nftModel.create({
             token_id: token_id,
-            // meta_uri: meta_json,
-            name: "#" + token_id,
-            description: "",
-            // description: json.description,
-            image: json.img,
+            name: json.name,
+            description: json.description,
+            image: json.image,
             attributes: json.attributes,
-            rank: json.rank,
-            rarity: json.rarity,
+            edition: json.edition,
+            seller_fee_basis_points: json.seller_fee_basis_points,
+            col: json.collection,
+            properties: json.properties,
+            category: json.category,
+            creators: json.creators,
+            symbol: json.symbol,
+            // meta_uri: meta_json,
+            // name: "#" + token_id,
+            // description: "",
+            // description: json.description,
+            // image: json.img,
+            // attributes: json.attributes,
+            // rank: json.rank,
+            // rarity: json.rarity,
         });
     } catch (err) {
         console.log("model error ", err);
@@ -101,13 +113,51 @@ exports.updateNFT = async (req, res) => {
     });
 };
 
+const getFiltered = (item, filters) => {
+    let result = false;
+    let hasSale = false;
+    if (filters['onSale']) {
+        hasSale = true;
+        result |= item.auction != null;
+    }
+    if (filters['notOnSale']) {
+        hasSale = true;
+        result |= item.auction == null;
+    }
+
+    let hasKey = false;
+    let flag = false;
+    for (const key in filters) {
+        if (key == 'onSale' || key == 'notOnSale')
+            continue;
+        hasKey = true;
+        const keys = key.split("#");
+        const traitType = keys[0];
+        const value = keys[1];
+        for (const attribute of item["attributes"]) {
+            const itemKey = attribute["traitType"] ? "traitType" : "trait_type";
+            if (attribute[itemKey] == traitType && attribute["value"] == value) {
+                flag = true;
+                break;
+            }
+        }
+        if (flag)
+            break;
+    }
+
+    let result_1 = hasSale ? result : true;
+    let result_2 = hasKey ? flag : true;
+
+    return result_1 & result_2;
+}
+
 exports.getNFTs = async (req, res) => {
-    const { col_name, start, limit, sort, filter } = req.body;
+    const { col_name, start, limit, sort, filters } = req.body;
 
     try {
         const nftModel = mongoose.model(col_name, nftSchema);
         const collection = await Collections.findOne({ col_name });
-        let nfts = await nftModel.find({}).lean().exec(); //.skip(start).limit(limit).lean().exec();
+        let nfts = await nftModel.find({}).lean().exec();
 
         const timeNow = Date.now() / 1000;
         const auctions = await Auctions.find({
@@ -154,9 +204,12 @@ exports.getNFTs = async (req, res) => {
             }
         }
 
-        if (filter == 1) {
-            nfts = nfts.filter((item) => item.auction != null);
-        }
+        // if (filter == 1) {
+        //     nfts = nfts.filter((item) => item.auction != null);
+        // }
+
+        nfts = nfts.filter((item) => getFiltered(item, filters));
+
         if (sort == 0) {
             nfts = _.orderBy(nfts, "token_id", "asc");
         } else if (sort == 1) {
@@ -176,11 +229,13 @@ exports.getNFTs = async (req, res) => {
                 "desc"
             );
         }
+        const length = nfts.length;
         nfts = nfts.splice(start, limit);
 
         res.status(200).json({
             status: "success",
             nfts,
+            length,
         });
     } catch (err) {
         console.log("model error ", err);
@@ -337,6 +392,53 @@ exports.getNFTInfo = async (req, res) => {
         });
     }
 };
+
+exports.getTraits = async (req, res) => {
+    const { col_name } = req.params;
+
+    try {
+        const nftModel = mongoose.model(col_name, nftSchema);
+        const nft_list = await nftModel.find({}).lean().exec();
+        const traits = {};
+        for (const nft of nft_list) {
+            for (const item of nft["attributes"]) {
+                const key = item["traitType"] ? "traitType" : "trait_type";
+                if (!traits[item[key]]) {
+                    traits[item[key]] = {};
+                }
+                if (!traits[item[key]][item["value"]]) {
+                    traits[item[key]][item["value"]] = 0;
+                }
+                traits[item[key]][item["value"]] = traits[item[key]][item["value"]] + 1;
+            }
+        }
+        const updated_traits = [];
+        for (const key_1 in traits) {
+            const item = traits[key_1];
+            const values = [];
+            for (const key_2 in item) {
+                values.push({
+                    name: key_2,
+                    value: item[key_2]
+                });
+            }
+            updated_traits.push({
+                name: key_1,
+                values: values
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            traits: updated_traits,
+        });
+    } catch (err) {
+        console.log("model error ", err);
+        res.status(404).json({
+            status: "fail",
+            msg: "getTraits failed",
+        });
+    }
+}
 
 exports.getAllNfts = async (req, res) => {
     const { col_names, start, limit } = req.body;
@@ -565,3 +667,84 @@ exports.getLiveAuctions = async (req, res) => {
         });
     }
 };
+
+exports.makeOffer = async (req, res) => {
+    try {
+        const { col_name, token_id, buyer, price, _id } = req.body;
+
+        const user = await User.findOne({ address: buyer }).lean().exec();
+
+        if (_id) {
+            await NOffers.updateOne({ _id }, { $set: { price } });
+        } else {
+            const newOffer = new NOffers();
+            newOffer.col_name = col_name;
+            newOffer.token_id = token_id;
+            newOffer.price = price;
+            newOffer.buyer = buyer;
+            newOffer.user_id = user?._id;
+            await newOffer.save();
+        }
+
+        res.status(200).json({
+            status: "success",
+        });
+    } catch (err) {
+        console.log("error", err);
+        res.status(400).json({
+            status: "fail",
+            msg: "makeOffer failed",
+        });
+    }
+};
+
+exports.finishOffer = async (req, res) => {
+    try {
+        const { _id } = req.body;
+
+        await NOffers.updateOne({ _id }, { $set: { finished: true } });
+
+        res.status(200).json({
+            status: "success",
+        });
+    } catch (err) {
+        console.log("error", err);
+        res.status(400).json({
+            status: "fail",
+            msg: "finishOffer failed",
+        });
+    }
+};
+
+exports.getOffers = async (req, res) => {
+    try {
+        const { col_name, token_id } = req.body;
+
+        const noffers = await NOffers.find({ col_name: col_name, token_id: token_id, finished: false });
+        const offers = [];
+        for (const offer of noffers) {
+            const user = await User.findOne({ _id: offer["user_id"] }).lean().exec();
+            offers.push({
+                _id: offer["_id"],
+                buyer: offer["buyer"],
+                col_name: offer["col_name"],
+                token_id: offer["token_id"],
+                price: offer["price"],
+                finished: offer["finished"],
+                createdAt: offer["createdAt"],
+                user
+            });
+        }
+
+        res.status(200).json({
+            status: "success",
+            offers,
+        });
+    } catch (err) {
+        console.log("error", err);
+        res.status(400).json({
+            status: "fail",
+            msg: "getOffers failed",
+        });
+    }
+}

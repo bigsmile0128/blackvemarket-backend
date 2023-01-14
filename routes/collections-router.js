@@ -46,5 +46,10 @@ router.post("/get-allnfts", collectionsController.getAllNfts);
 router.post("/update-nft", collectionsController.updateNFT);
 router.get("/liveAuctions", collectionsController.getLiveAuctions);
 router.post("/change-owner", collectionsController.takeOwnership);
+router.post("/make-offer", collectionsController.makeOffer);
+router.post("/cancel-offer", collectionsController.finishOffer);
+router.post("/accept-offer", collectionsController.finishOffer);
+router.post("/get-offers", collectionsController.getOffers);
+router.get("/get-traits/:col_name", collectionsController.getTraits);
 
 module.exports = router;

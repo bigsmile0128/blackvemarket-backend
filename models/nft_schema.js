@@ -12,7 +12,14 @@ const nftSchema = new Schema({
     valid: Boolean,
     rank: Number,
     rarity: Number,
-    // owner: String,
+    edition: String,
+    seller_fee_basis_points: Number,
+    col: Object,
+    properties: Object,
+    category: String,
+    creators: [{ type: Map }],
+    symbol: String,
+    owner: String,
 });
 nftSchema.index({ token_id: 1 }, { unique: true });
 

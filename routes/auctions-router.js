@@ -20,6 +20,7 @@ router.post("/events/onSaleCXL", auctionsController.onSaleCXL);
 router.post("/events/onRefunded", auctionsController.onRefunded);
 router.post("/events/onTransferNFT", auctionsController.onTransferNFT);
 router.get("/events/onTest", auctionsController.test);
+router.get("/events/collection/:col_name/:address/:count", auctionsController.collection);
 
 // router.post("/get-auction", auctionsController.getAuction);
 
