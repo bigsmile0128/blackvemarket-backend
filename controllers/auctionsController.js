@@ -346,7 +346,7 @@ exports.onTransferNFT = async (req, res) => {
         });
 
         if (collection) {
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
             if (from === "0x0000000000000000000000000000000000000000") {
                 let meta_uri = collection["meta_uri"];
                 let image_uri = collection["image_uri"];

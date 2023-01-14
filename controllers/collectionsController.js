@@ -11,7 +11,6 @@ const Auctions = require("../models/auctions");
 const Offers = require("../models/offers");
 const NFT_JSON = require("../abis/NFTs.json");
 const Logs = require("../models/logs");
-const NOffers = require("../models/noffers");
 // import _ from 'lodash';
 const _ = require("lodash");
 
@@ -38,7 +37,7 @@ exports.takeOwnership = async (req, res) => {
 
     try {
         const collection = await Collections.findOne({ col_name });
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const nft_list = await nftModel.find({}).lean().exec();
         for (const nft of nft_list) {
             const address = collection["address"];
@@ -65,28 +64,17 @@ exports.addNFT = async (req, res) => {
 
     try {
         let json = JSON.parse(meta_json);
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         await nftModel.create({
             token_id: token_id,
-            name: json.name,
-            description: json.description,
-            image: json.image,
-            attributes: json.attributes,
-            edition: json.edition,
-            seller_fee_basis_points: json.seller_fee_basis_points,
-            col: json.collection,
-            properties: json.properties,
-            category: json.category,
-            creators: json.creators,
-            symbol: json.symbol,
             // meta_uri: meta_json,
-            // name: "#" + token_id,
-            // description: "",
+            name: "#" + token_id,
+            description: "",
             // description: json.description,
-            // image: json.img,
-            // attributes: json.attributes,
-            // rank: json.rank,
-            // rarity: json.rarity,
+            image: json.img,
+            attributes: json.attributes,
+            rank: json.rank,
+            rarity: json.rarity,
         });
     } catch (err) {
         console.log("model error ", err);
@@ -100,7 +88,7 @@ exports.updateNFT = async (req, res) => {
     const { col_name, token_id } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         await nftModel.updateOne(
             { token_id: token_id },
             { $set: { valid: true } }
@@ -113,51 +101,13 @@ exports.updateNFT = async (req, res) => {
     });
 };
 
-const getFiltered = (item, filters) => {
-    let result = false;
-    let hasSale = false;
-    if (filters['onSale']) {
-        hasSale = true;
-        result |= item.auction != null;
-    }
-    if (filters['notOnSale']) {
-        hasSale = true;
-        result |= item.auction == null;
-    }
-
-    let hasKey = false;
-    let flag = false;
-    for (const key in filters) {
-        if (key == 'onSale' || key == 'notOnSale')
-            continue;
-        hasKey = true;
-        const keys = key.split("#");
-        const traitType = keys[0];
-        const value = keys[1];
-        for (const attribute of item["attributes"]) {
-            const itemKey = attribute["traitType"] ? "traitType" : "trait_type";
-            if (attribute[itemKey] == traitType && attribute["value"] == value) {
-                flag = true;
-                break;
-            }
-        }
-        if (flag)
-            break;
-    }
-
-    let result_1 = hasSale ? result : true;
-    let result_2 = hasKey ? flag : true;
-
-    return result_1 & result_2;
-}
-
 exports.getNFTs = async (req, res) => {
-    const { col_name, start, limit, sort, filters } = req.body;
+    const { col_name, start, limit, sort, filter } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const collection = await Collections.findOne({ col_name });
-        let nfts = await nftModel.find({}).lean().exec();
+        let nfts = await nftModel.find({}).lean().exec(); //.skip(start).limit(limit).lean().exec();
 
         const timeNow = Date.now() / 1000;
         const auctions = await Auctions.find({
@@ -204,12 +154,9 @@ exports.getNFTs = async (req, res) => {
             }
         }
 
-        // if (filter == 1) {
-        //     nfts = nfts.filter((item) => item.auction != null);
-        // }
-
-        nfts = nfts.filter((item) => getFiltered(item, filters));
-
+        if (filter == 1) {
+            nfts = nfts.filter((item) => item.auction != null);
+        }
         if (sort == 0) {
             nfts = _.orderBy(nfts, "token_id", "asc");
         } else if (sort == 1) {
@@ -229,13 +176,11 @@ exports.getNFTs = async (req, res) => {
                 "desc"
             );
         }
-        const length = nfts.length;
         nfts = nfts.splice(start, limit);
 
         res.status(200).json({
             status: "success",
             nfts,
-            length,
         });
     } catch (err) {
         console.log("model error ", err);
@@ -276,7 +221,7 @@ exports.getItemAuction = async (req, res) => {
         }
 
         const collection = await Collections.findOne({ address }).lean().exec();
-        const nftModel = mongoose.model(collection["col_name"], nftSchema);
+        const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
         const nft_item = await nftModel
             .findOne({ token_id: token_id })
             .lean()
@@ -345,7 +290,7 @@ exports.getItemDetails = async (req, res) => {
     const { col_name, token_id } = req.body;
 
     try {
-        const nftModel = mongoose.model(col_name, nftSchema);
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
         const collection = await Collections.findOne({ col_name })
             .lean()
             .exec();
@@ -373,7 +318,7 @@ exports.getNFTInfo = async (req, res) => {
 
     try {
         const collection = await Collections.findOne({ address }).lean().exec();
-        const nftModel = mongoose.model(collection["col_name"], nftSchema);
+        const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
         const details = await nftModel
             .findOne({ token_id: token_id })
             .lean()
@@ -393,53 +338,6 @@ exports.getNFTInfo = async (req, res) => {
     }
 };
 
-exports.getTraits = async (req, res) => {
-    const { col_name } = req.params;
-
-    try {
-        const nftModel = mongoose.model(col_name, nftSchema);
-        const nft_list = await nftModel.find({}).lean().exec();
-        const traits = {};
-        for (const nft of nft_list) {
-            for (const item of nft["attributes"]) {
-                const key = item["traitType"] ? "traitType" : "trait_type";
-                if (!traits[item[key]]) {
-                    traits[item[key]] = {};
-                }
-                if (!traits[item[key]][item["value"]]) {
-                    traits[item[key]][item["value"]] = 0;
-                }
-                traits[item[key]][item["value"]] = traits[item[key]][item["value"]] + 1;
-            }
-        }
-        const updated_traits = [];
-        for (const key_1 in traits) {
-            const item = traits[key_1];
-            const values = [];
-            for (const key_2 in item) {
-                values.push({
-                    name: key_2,
-                    value: item[key_2]
-                });
-            }
-            updated_traits.push({
-                name: key_1,
-                values: values
-            });
-        }
-        res.status(200).json({
-            status: "success",
-            traits: updated_traits,
-        });
-    } catch (err) {
-        console.log("model error ", err);
-        res.status(404).json({
-            status: "fail",
-            msg: "getTraits failed",
-        });
-    }
-}
-
 exports.getAllNfts = async (req, res) => {
     const { col_names, start, limit } = req.body;
     const allnfts = [];
@@ -448,7 +346,7 @@ exports.getAllNfts = async (req, res) => {
     try {
         await Promise.all(
             col_names.map(async (item) => {
-                const nftModel = mongoose.model(item.field, nftSchema);
+                const nftModel = mongoose.model(item.field, nftSchema, item.field);
                 const nfts = await nftModel
                     .find({})
                     .skip(start)
@@ -565,7 +463,7 @@ exports.getLiveAuctions = async (req, res) => {
             })
                 .lean()
                 .exec();
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
             const details = await nftModel
                 .findOne({ token_id: auction["tokenId"] })
                 .lean()
@@ -597,7 +495,7 @@ exports.getLiveAuctions = async (req, res) => {
             })
                 .lean()
                 .exec();
-            const nftModel = mongoose.model(collection["col_name"], nftSchema);
+            const nftModel = mongoose.model(collection["col_name"], nftSchema, collection["col_name"]);
             const details = await nftModel
                 .findOne({ token_id: auction["tokenId"] })
                 .lean()
@@ -667,6 +565,57 @@ exports.getLiveAuctions = async (req, res) => {
         });
     }
 };
+
+
+
+exports.getTraits = async (req, res) => {
+    const { col_name } = req.params;
+
+    try {
+        const nftModel = mongoose.model(col_name, nftSchema, col_name);
+        const nft_list = await nftModel.find({}).lean().exec();
+        const traits = {};
+        for (const nft of nft_list) {
+            for (const item of nft["attributes"]) {
+                const key = item["traitType"] ? "traitType" : "trait_type";
+                if (!traits[item[key]]) {
+                    traits[item[key]] = {};
+                }
+                if (!traits[item[key]][item["value"]]) {
+                    traits[item[key]][item["value"]] = 0;
+                }
+                traits[item[key]][item["value"]] = traits[item[key]][item["value"]] + 1;
+            }
+        }
+        const updated_traits = [];
+        for (const key_1 in traits) {
+            const item = traits[key_1];
+            const values = [];
+            for (const key_2 in item) {
+                values.push({
+                    name: key_2,
+                    value: item[key_2]
+                });
+            }
+            updated_traits.push({
+                name: key_1,
+                values: values
+            });
+        }
+        res.status(200).json({
+            status: "success",
+            traits: updated_traits,
+        });
+    } catch (err) {
+        console.log("model error ", err);
+        res.status(404).json({
+            status: "fail",
+            msg: "getTraits failed",
+        });
+    }
+}
+
+
 
 exports.makeOffer = async (req, res) => {
     try {
